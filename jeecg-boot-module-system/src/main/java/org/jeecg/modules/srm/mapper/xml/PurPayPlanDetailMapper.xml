@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.srm.mapper.PurPayPlanDetailMapper">
+
+	<delete id="deleteByMainId" parameterType="java.lang.String">
+		DELETE 
+		FROM  pur_pay_plan_detail 
+		WHERE
+			 pay_plan_id = #{mainId} 	</delete>
+	
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.PurPayApply">
+		SELECT
+			ppa.*
+		FROM
+			pur_pay_plan_detail pppd
+			left join pur_pay_apply ppa on pppd.pay_apply_id = ppa.id
+		WHERE
+			pppd.del_flag = '0'
+			and pppd.pay_plan_id = #{mainId}
+	 </select>
+
+	<select id="fetchAmountByModel" resultType="org.jeecg.modules.srm.entity.PurPayPlanDetail">
+		SELECT
+			ppa.project_id,
+			sum( ppad.pay_amount ) AS pay_amount,
+			bm.model
+		FROM
+			pur_pay_plan_detail pppd
+			INNER JOIN pur_pay_plan ppp ON pppd.pay_plan_id = ppp.id
+			INNER JOIN pur_pay_apply ppa ON pppd.pay_apply_id = ppa.id
+			INNER JOIN pur_pay_apply_detail ppad ON ppa.id = ppad.apply_id and ppad.del_flag = '0'
+			INNER JOIN contract_object_qty co ON ppad.bill_detail_id = co.id
+			INNER JOIN bas_material bm on co.prod_code = bm.code
+		WHERE
+			pppd.del_flag = '0'
+		  AND ppp.pay_status = '2'
+		  AND ppa.project_id = #{query.projectId}
+		GROUP BY
+			ppa.project_id,
+			bm.model
+	</select>
+
+	<select id="fetchAmountByCategory" resultType="org.jeecg.modules.srm.entity.PurPayPlanDetail">
+		select tmp.project_id,tmp.pay_amount,tmp.category_id from (
+		  SELECT
+			  ppa.project_id,
+			  sum(ppad.pay_amount) AS pay_amount,
+			  cb.category_id
+		  FROM
+			  pur_pay_plan_detail pppd
+				  INNER JOIN pur_pay_plan ppp ON pppd.pay_plan_id = ppp.id
+				  INNER JOIN pur_pay_apply ppa ON pppd.pay_apply_id = ppa.id
+				  INNER JOIN pur_pay_apply_detail ppad ON ppa.id = ppad.apply_id and ppad.del_flag = '0'
+				  LEFT JOIN contract_base cb on ppa.contract_id = cb.id
+		  WHERE
+			  pppd.del_flag = '0'
+			AND ppp.pay_status = '2'
+			AND ppa.project_id = #{query.projectId}
+		  GROUP BY
+			  ppa.project_id,
+			  cb.category_id
+		  union all
+		  select
+			  pcp.project_id,
+			  sum(pcp.pay_amount) as pay_amount,
+			  pcp.category_id
+		  from project_category_pay pcp
+		  where pcp.del_flag = '0'
+			and pcp.type = '1'
+			and pcp.project_id = #{query.projectId}
+		  group by pcp.project_id,pcp.category_id
+	    ) tmp
+		group by tmp.project_id,tmp.category_id
+	</select>
+</mapper>

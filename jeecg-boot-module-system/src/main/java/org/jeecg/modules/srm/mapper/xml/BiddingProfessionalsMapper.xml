@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.srm.mapper.BiddingProfessionalsMapper">
+
+	<delete id="deleteByMainId" parameterType="java.lang.String">
+		DELETE 
+		FROM  bidding_professionals 
+		WHERE
+			 bidding_id = #{mainId} 	</delete>
+	
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.BiddingProfessionals">
+		SELECT * 
+		FROM  bidding_professionals
+		WHERE
+			 bidding_id = #{mainId} 	</select>
+
+	<select id="groupByTemplateList" resultType="org.jeecg.modules.srm.entity.BiddingProfessionals">
+		SELECT
+			status
+		FROM
+			bidding_professionals
+		where del_flag = '0'
+		  and bidding_id = #{id}
+		  and professional_id = #{username}
+		group by bidding_id
+	</select>
+
+	<select id="fetchBiddingExpertList" resultType="org.jeecg.modules.srm.entity.BiddingProfessionals">
+		SELECT
+			distinct
+			professional_id,
+			professional_name,
+			bidding_evaluate_type
+		FROM
+			bidding_professionals
+		where del_flag = '0'
+			  and bidding_id = #{id}
+		group by professional_id
+	</select>
+
+	<select id="countNum" resultType="org.jeecg.modules.srm.entity.BiddingProfessionals">
+		SELECT
+			bidding_id,
+			bidding_evaluate_type,
+			count(DISTINCT professional_id) as num
+		FROM
+			bidding_professionals
+		where del_flag = '0'
+		  and bidding_id = #{id}
+		  and status = '1'
+		GROUP BY
+			bidding_id,bidding_evaluate_type
+	</select>
+
+	<select id="fetchBidEvaluation" resultType="org.jeecg.modules.srm.entity.PurchaseRequestMain">
+		SELECT
+			sum(brtp.item_score) as item_score,
+			sup.name as supp_name,
+			prm.project_name,
+			prm.req_title,
+			brtp.create_time
+		FROM
+			bidding_professionals bp
+			inner join bidding_record_to_professionals brtp on bp.id = brtp.bps_id and brtp.del_flag = '0'
+			inner join bidding_supplier bs on brtp.bs_id = bs.id and bs.del_flag = '0'
+			inner join bas_supplier sup on bs.supplier_id = sup.id
+			inner join bidding_main bm on bp.bidding_id = bm.id
+			inner join purchase_request_main prm on bm.request_id = prm.id
+		where bp.professional_id = #{query.professionalId}
+		  and bp.del_flag = '0'
+		  and brtp.item_score is not null
+		<if test="query.projectName !=null and query.projectName != ''">
+			and prm.project_name LIKE concat(concat('%',#{query.projectName}),'%')
+		</if>
+		<if test="query.reqTitle !=null and query.reqTitle != ''">
+			and prm.req_title LIKE concat(concat('%',#{query.reqTitle}),'%')
+		</if>
+		<if test="query.suppName !=null and query.suppName != ''">
+			and sup.name LIKE concat(concat('%',#{query.suppName}),'%')
+		</if>
+		group by prm.id,prm.project_id,sup.id
+	</select>
+
+	<select id="fetchExpertTotalScore" resultType="map">
+		SELECT DISTINCT
+			br.prod_name as prodName,
+			bsr.`name`,
+			IFNULL(brtp.jsScore,0) + IFNULL(brtp.swScore,0) as score,
+			IFNULL(brtp.jsScore,0) as jsScore,
+			IFNULL(brtp.swScore,0) as swScore
+		FROM
+			bidding_record br
+			INNER JOIN bidding_supplier bs ON br.bidding_id = bs.bidding_id
+			INNER JOIN bas_supplier bsr on bs.supplier_id = bsr.id
+			left join (
+			SELECT
+				brtp.bs_id,
+				sum(case when bps.bidding_evaluate_type = 0 then brtp.item_score end) as jsScore,
+				sum(case when bps.bidding_evaluate_type = 1 then brtp.item_score end) as swScore
+			FROM
+				bidding_record_to_professionals brtp
+				inner join (
+					SELECT
+						bidding_id,
+						bidding_evaluate_type,
+						id
+					FROM
+						bidding_professionals
+					where bidding_id = #{query.biddingId}
+				) bps on brtp.bps_id = bps.id
+				WHERE
+					brtp.del_flag = '0'
+				  AND brtp.is_submit = '1'
+				GROUP BY
+					brtp.bs_id
+			) brtp on bs.id = brtp.bs_id
+		WHERE
+			br.del_flag = '0'
+		  AND br.bidding_id = #{query.biddingId}
+	</select>
+
+
+	<select id="fetchExpertJsTotalScore" resultType="map">
+		SELECT DISTINCT
+			br.prod_name as prodName,
+			bsr.`name`,
+			IFNULL(brtp.jsScore,0) as jsScore
+		FROM
+			bidding_record br
+			INNER JOIN bidding_supplier bs ON br.bidding_id = bs.bidding_id and bs.del_flag = '0'
+			INNER JOIN bas_supplier bsr on bs.supplier_id = bsr.id
+			left join (
+				SELECT
+					brtp.bs_id,
+					sum(case when bps.bidding_evaluate_type = 0 then brtp.item_score end) as jsScore,
+					count(1) as num
+				FROM
+					bidding_record_to_professionals brtp
+						inner join (
+						SELECT
+							bidding_id,
+							bidding_evaluate_type,
+							id
+						FROM
+							bidding_professionals
+						where bidding_id = #{query.biddingId}
+						  and bidding_evaluate_type = '0'
+					) bps on brtp.bps_id = bps.id
+				WHERE
+					brtp.del_flag = '0'
+				  AND brtp.is_submit = '1'
+				GROUP BY
+					brtp.bs_id
+			) brtp on bs.id = brtp.bs_id
+		WHERE
+			br.del_flag = '0'
+		  AND br.bidding_id = #{query.biddingId}
+	</select>
+
+	<select id="fetchScore" resultType="map">
+		SELECT
+			professional_name as name,
+			sum( item_score ) AS itemScore
+		FROM
+			(
+				SELECT
+					bs.professional_id,
+					bs.professional_name,
+					brtp.item_score AS item_score
+				FROM
+					bidding_professionals bs
+						INNER JOIN bidding_record_to_professionals brtp ON bs.id = brtp.bps_id
+				WHERE
+					bs.del_flag = '0'
+				  AND brtp.del_flag = '0'
+				  AND bs.bidding_evaluate_type = #{type}
+				  AND bs.bidding_id = #{biddingId}
+				GROUP BY
+					bs.professional_id,
+					bs.item_name,
+					bs.item_standard
+			) bs
+		GROUP BY
+			bs.professional_id
+	</select>
+
+	<select id="countExpert" resultType="integer">
+		select count(DISTINCT professional_id) as num from bidding_professionals
+		where bidding_id = #{query.biddingId}
+		<if test="query.type != null and query.type != ''">
+			AND bidding_evaluate_type = #{query.type}
+		</if>
+	</select>
+</mapper>

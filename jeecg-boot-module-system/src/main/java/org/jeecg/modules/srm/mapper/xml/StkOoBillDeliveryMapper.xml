@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.srm.mapper.StkOoBillDeliveryMapper">
+
+	<delete id="deleteByMainId" parameterType="java.lang.String">
+		DELETE 
+		FROM  stk_oo_bill_delivery 
+		WHERE
+			 mid = #{mainId} 	</delete>
+	
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.StkOoBillDelivery">
+		SELECT
+			coq.prod_code,
+			coq.prod_name,
+			coq.prod_spec_type,
+			coq.unit_id,
+			sobd.entry_no,
+			sobd.qty
+		FROM
+		      stk_oo_bill_delivery sobd
+			  left join contract_object_qty coq on sobd.order_detail_id = coq.id
+		WHERE
+			sobd.mid = #{mainId}
+		  and sobd.del_flag = '0'
+	 </select>
+</mapper>

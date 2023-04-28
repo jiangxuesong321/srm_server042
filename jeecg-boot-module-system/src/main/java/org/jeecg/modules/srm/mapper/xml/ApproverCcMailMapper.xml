@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.srm.mapper.ApproverCcMailMapper">
+
+<select id="selectUserMails" resultType="org.jeecg.modules.system.entity.SysUser">
+           select su.*
+           from sys_user su
+           where su.del_flag = '0'
+           and su.username in
+            <foreach collection="ids.split(',')" item="item" index="index" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+    </select>
+
+    <select id="getCcUsersId" resultType="java.lang.String">
+        select acm.cpoy_send_user_ids
+        from approver_cc_mail acm
+        where acm.del_flag = '0'
+    </select>
+</mapper>

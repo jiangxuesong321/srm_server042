@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.srm.mapper.BiddingMainMapper">
+    <select id="pageList" resultType="org.jeecg.modules.srm.entity.BiddingMain">
+        SELECT
+        bm.*,
+        pb.proj_name,
+        pb.proj_code,
+        prm.req_type,
+        prm.category_id,
+        prm.attachment as pur_attachment,
+        prm.comment as pur_comment,
+        prm.other_attachment as pur_other_attachment
+        FROM
+        bidding_main bm
+        left join purchase_request_main prm on bm.request_id = prm.id
+        left join proj_base pb on prm.project_id = pb.id
+        where bm.del_flag = '0'
+        <if test="query.biddingStatus != null and query.biddingStatus != '' and query.biddingStatus != 'all'">
+            AND bm.bidding_status in
+            <foreach collection="query.biddingStatus.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.biddingName != null and query.biddingName != ''">
+            AND bm.bidding_name LIKE concat(concat('%',#{query.biddingName}),'%')
+        </if>
+        <if test="query.biddingNo != null and query.biddingNo != ''">
+            AND bm.bidding_no LIKE concat(concat('%',#{query.biddingNo}),'%')
+        </if>
+        <if test="query.biddingType != null and query.biddingType != ''">
+            AND bm.bidding_type = #{query.biddingType}
+        </if>
+        <if test="query.auth == 'owner'">
+            AND bm.create_user = #{query.auther}
+        </if>
+        <if test="query.auth == 'dept'">
+            AND (select depart_ids from sys_user su where bm.create_user = su.username) = #{query.auther}
+        </if>
+        <if test="query.auth == 'subject'">
+            AND pb.subject in
+            <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="query.column != null and query.column != ''">
+            <if test="query.column == 'biddingNo'">
+                order by bm.bidding_no
+            </if>
+            <if test="query.column == 'biddingName'">
+                order by bm.bidding_name
+            </if>
+            <if test="query.column == 'projName'">
+                order by pb.proj_name
+            </if>
+            <if test="query.column == 'biddingType'">
+                order by bm.bidding_type
+            </if>
+            <if test="query.column == 'biddingStatus'">
+                order by bm.bidding_status
+            </if>
+            <if test="query.column == 'createTime'">
+                order by bm.create_time
+            </if>
+            <if test="query.order == 'asc'">
+                asc
+            </if>
+            <if test="query.order == 'desc'">
+                desc
+            </if>
+
+        </if>
+    </select>
+    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.BiddingMain">
+        SELECT
+            bm.*,
+            pb.proj_name,
+            pb.proj_code,
+            prm.req_type,
+            prm.category_id,
+            sup.name as supp_name,
+            bs.id as bs_id,
+            sd.id as contractFirstPartyId,
+            sd.depart_name as contractFirstParty,
+            sd.mobile as contractFirstTelphone,
+            sd.fax as contractFirstFax,
+            sd.address as contractFirstAddress,
+            sd.contacter as contractFirstContact,
+            sd.corporate as contractFirstLegalPerson,
+            sd.agent as contractFirstAgent,
+            sd.bank_name as contractFirstOpeningBank,
+            sd.bank_account as contractFirstBankAccount,
+            sd.post_code as contractFirstPostCode,
+            bq.currency,
+            bq.tax_rate
+        FROM
+            bidding_main bm
+            left join purchase_request_main prm on bm.request_id = prm.id
+            left join proj_base pb on prm.project_id = pb.id
+            left join bidding_supplier bs on bm.id = bs.bidding_id
+            left join bas_supplier sup on bs.supplier_id = sup.id
+            left join sys_depart sd on pb.subject = sd.id
+            left join bidding_quote bq on bm.id = bq.bidding_id and bq.supp_id = bs.supplier_id
+        where bm.del_flag = '0'
+        and bs.is_recommend = '1'
+        and bs.del_flag = '0'
+        <if test="query.auth == 'owner'">
+            AND bm.create_user = #{query.auther}
+        </if>
+        <if test="query.auth == 'dept'">
+            AND (select depart_ids from sys_user su where bm.create_user = su.username) = #{query.auther}
+        </if>
+        <if test="query.auth == 'subject'">
+            AND pb.subject in
+            <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.biddingStatus != null and query.biddingStatus != '' and query.biddingStatus != 'all'">
+            AND bm.bidding_status in
+            <foreach collection="query.biddingStatus.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.biddingName != null and query.biddingName != ''">
+            AND bm.bidding_name LIKE concat(concat('%',#{query.biddingName}),'%')
+        </if>
+        <if test="query.biddingNo != null and query.biddingNo != ''">
+            AND bm.bidding_no LIKE concat(concat('%',#{query.biddingNo}),'%')
+        </if>
+        <if test="query.biddingType != null and query.biddingType != ''">
+            AND bm.bidding_type = #{query.biddingType}
+        </if>
+        <if test="query.isContract != null and query.isContract != ''">
+            AND bs.is_contract = #{query.isContract}
+        </if>
+
+        <if test="query.column != null and query.column != ''">
+            <if test="query.column == 'biddingNo'">
+                order by bm.bidding_no
+            </if>
+            <if test="query.column == 'biddingName'">
+                order by bm.bidding_name
+            </if>
+            <if test="query.column == 'projName'">
+                order by pb.proj_name
+            </if>
+            <if test="query.column == 'biddingType'">
+                order by bm.bidding_type
+            </if>
+            <if test="query.column == 'suppName'">
+                order by sup.name
+            </if>
+            <if test="query.column == 'biddingStatus'">
+                order by bm.bidding_status
+            </if>
+            <if test="query.column == 'createTime'">
+                order by bm.create_time
+            </if>
+            <if test="query.order == 'asc'">
+                asc
+            </if>
+            <if test="query.order == 'desc'">
+                desc
+            </if>
+        </if>
+    </select>
+
+    <select id="evaluateList" resultType="org.jeecg.modules.srm.entity.BiddingMain">
+        SELECT
+            bm.*,
+            bps.status,
+            case
+            when (DATE_FORMAT(NOW(),'%Y-%m-%d') BETWEEN bm.bidding_start_time AND bm.bidding_end_time) and (bm.bidding_status = '1' or bm.bidding_status = '2') then '1'
+            else '0' end operation,
+            bps.professional_id,
+            bps.bidding_evaluate_type
+        FROM
+            bidding_main bm
+        inner join (
+            SELECT
+                distinct
+                bps.status,
+                bps.bidding_id,
+                bps.professional_id,
+                bps.bidding_evaluate_type
+            FROM
+                bidding_professionals bps
+            where bps.del_flag = '0'
+            group by bps.bidding_id,bps.professional_id
+        ) bps on bps.bidding_id = bm.id
+        where bm.del_flag = '0'
+        AND bm.bidding_status in ('1','2','3','8')
+        <if test="query.auth == 'owner'">
+            AND bps.professional_id = #{query.auther}
+        </if>
+        <if test="query.auth == 'dept'">
+            AND (select depart_ids from sys_user su where bps.professional_id = su.username) = #{query.auther}
+        </if>
+        <if test="query.auth == 'subject'">
+            AND exists (
+                select pb.id from proj_base pb where bm.project_id = pb.id and pb.subject in
+            <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+            )
+        </if>
+        <if test="query.biddingName != null and query.biddingName != ''">
+            AND bm.bidding_name LIKE concat(concat('%',#{query.biddingName}),'%')
+        </if>
+        <if test="query.biddingNo != null and query.biddingNo != ''">
+            AND bm.bidding_no LIKE concat(concat('%',#{query.biddingNo}),'%')
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND bps.status = #{query.status}
+        </if>
+        <if test="query.startTime != null and query.startTime != '' and query.endTime != null and query.endTime != ''">
+            AND (
+                (bm.bidding_start_time between #{query.startTime} and #{query.endTime})
+                or (bm.bidding_end_time between #{query.startTime} and #{query.endTime})
+                or (#{query.startTime} between bm.bidding_end_time and bm.bidding_end_time)
+                or (#{query.endTime} between bm.bidding_end_time and bm.bidding_end_time)
+                )
+        </if>
+
+        <if test="query.column != null and query.column != ''">
+            <if test="query.column == 'biddingNo'">
+                order by bm.bidding_no
+            </if>
+            <if test="query.column == 'biddingName'">
+                order by bm.bidding_name
+            </if>
+            <if test="query.column == 'professionalId'">
+                order by bps.professional_id
+            </if>
+            <if test="query.column == 'biddingStartTime'">
+                order by bm.bidding_start_time
+            </if>
+            <if test="query.column == 'biddingEndTime'">
+                order by bm.bidding_end_time
+            </if>
+            <if test="query.column == 'status'">
+                order by bps.status
+            </if>
+            <if test="query.column == 'createTime'">
+                order by bm.create_time
+            </if>
+            <if test="query.order == 'asc'">
+                asc
+            </if>
+            <if test="query.order == 'desc'">
+                desc
+            </if>
+
+        </if>
+    </select>
+
+    <select id="fetchRecordList" resultType="org.jeecg.modules.srm.entity.BiddingRecord">
+        SELECT
+            br.id,
+            br.bidding_id,
+            br.prod_id,
+            br.prod_code,
+            br.prod_name,
+            br.spe_type,
+            br.to_record_id,
+            br.qty,
+            br.unit_id,
+            br.lead_time,
+            tp.`status`,
+            bs.num,
+            bs1.num as actNum
+        FROM
+            bidding_record br
+            LEFT JOIN (
+                SELECT
+                    bps.bidding_id,
+                    bps.status
+                FROM
+                    bidding_professionals bps
+                WHERE
+                    bps.del_flag = '0'
+                  AND bps.professional_id = #{query.professionalId}
+                GROUP BY
+                    bps.bidding_id
+            ) tp ON br.bidding_id = tp.bidding_id
+            LEFT JOIN (
+                select count(1) as num,bs.bidding_id from bidding_supplier bs
+                where bs.bidding_id = #{query.id}
+                and bs.del_flag = '0'
+                group by bs.bidding_id
+            ) bs on br.bidding_id = bs.bidding_id
+            LEFT JOIN (
+                select count(1) as num,bs.bidding_id from bidding_supplier bs
+                where bs.bidding_id = #{query.id}
+                  and bs.del_flag = '0'
+                  and bs.status >= 2
+                group by bs.bidding_id
+            ) bs1 on br.bidding_id = bs1.bidding_id
+        WHERE
+            br.del_flag = '0'
+          AND br.bidding_id = #{query.id}
+    </select>
+
+    <select id="fetchRecordTwoList" resultType="org.jeecg.modules.srm.entity.BiddingRecord">
+        SELECT
+            br.id,
+            br.bidding_id,
+            br.prod_id,
+            br.prod_code,
+            br.prod_name,
+            br.spe_type,
+            br.to_record_id,
+            br.qty,
+            br.unit_id,
+            br.lead_time,
+            br.`status`,
+            bs.num,
+            bs1.num as actNum
+        FROM
+            bidding_record br
+            LEFT JOIN (
+                select count(1) as num,bs.bidding_id from bidding_supplier bs
+                where bs.bidding_id = #{query.id}
+                  and bs.del_flag = '0'
+                group by bs.bidding_id
+            ) bs on br.bidding_id = bs.bidding_id
+                LEFT JOIN (
+                select count(1) as num,bs.bidding_id from bidding_supplier bs
+                where bs.bidding_id = #{query.id}
+                  and bs.del_flag = '0'
+                  and bs.status >= 2
+                group by bs.bidding_id
+            ) bs1 on br.bidding_id = bs1.bidding_id
+        WHERE
+            br.del_flag = '0'
+          AND br.bidding_id = #{query.id}
+    </select>
+
+    <select id="getSuppInfo" resultType="org.jeecg.modules.srm.entity.BasSupplier">
+        SELECT
+            bs.id,
+            bs.name,
+            bs.address,
+           <!-- bs.telephone,-->
+            bs.fax,
+            bs.corporate,
+            bs.bank_branch,
+            bs.bank_account,
+            bsc.contacter,
+            bsc.contacter_tel telephone
+        FROM
+            bidding_supplier bd
+            left join bas_supplier bs on bd.supplier_id = bs.id
+            left join bas_supplier_contact bsc on bs.id = bsc.supplier_id and bsc.is_default = '1'
+        where bd.del_flag = '0'
+          and bd.is_recommend = '1'
+          and bd.id = #{query.id}
+    </select>
+
+    <select id="fetchQuote" resultType="org.jeecg.modules.srm.entity.BiddingMain">
+        SELECT
+            bm.id,
+            bm.bidding_type,
+            sup.name as supp_name,
+            bs.`status`,
+            bs.supplier_id,
+            bqr.amount_tax,
+            bqr.lead_time,
+            bqr.currency as bidding_currency,
+            bqr.attachment,
+            bqr.comment,
+            lte.t_rank as lead_time_rank,
+            pr.t_rank as price_rank
+        FROM
+            bidding_main bm
+            left join bidding_supplier bs on bm.id = bs.bidding_id and bs.del_flag = '0'
+            left join bas_supplier sup on bs.supplier_id = sup.id
+            left join (
+                SELECT
+                    bqr.bidding_id,
+                    bqr.supp_id,
+                    sum( bqr.amount_tax ) AS amount_tax,
+                    max(bqr.lead_time) as lead_time,
+                    bq.currency,
+                    bq.attachment,
+                    bq.comment
+                FROM
+                    bidding_quote_record bqr
+                    left join bidding_quote bq on bqr.quote_id = bq.id
+                WHERE
+                    bqr.del_flag = '0'
+                    and bqr.bidding_id = #{query.id}
+                GROUP BY
+                    bqr.bidding_id,bqr.supp_id
+            ) bqr on bm.id = bqr.bidding_id and bs.supplier_id = bqr.supp_id
+            left join (
+                SELECT
+                    RANK() OVER ( ORDER BY MAX( lead_time ) ASC ) AS t_rank ,
+                    bidding_id,
+                    supp_id
+                FROM
+                    bidding_quote_record
+                WHERE
+                    bidding_id = #{query.id}
+                    and del_flag = '0'
+                GROUP BY bidding_id, supp_id
+            ) lte on bm.id = lte.bidding_id and bs.supplier_id = lte.supp_id
+            left join (
+                SELECT
+                    RANK() OVER ( ORDER BY round(sum(amount_tax_local),4) ) AS t_rank,
+                    bidding_id,
+                    supp_id
+                FROM
+                    bidding_quote_record
+                WHERE
+                    bidding_id = #{query.id}
+                    and del_flag = '0'
+                GROUP BY bidding_id, supp_id
+            ) pr on bm.id = pr.bidding_id and bs.supplier_id = pr.supp_id
+        where bm.id = #{query.id}
+        order by pr.t_rank
+    </select>
+
+    <select id="getLeadTimeRank" resultType="string">
+        SELECT
+            RANK() OVER ( ORDER BY MAX( lead_time ) ASC ) AS t_rank ,
+            supp_id
+        FROM
+            bidding_quote_record
+        WHERE
+            bidding_id = #{id}
+        GROUP BY bidding_id, supp_id
+
+    </select>
+
+    <select id="getPriceRank" resultType="string">
+        SELECT
+            RANK() OVER ( ORDER BY round(sum(amount_tax) / sum(qty * capacity),4) desc ) AS t_rank,
+                supp_id
+        FROM
+            bidding_quote_record
+        WHERE
+            bidding_id = #{id}
+        GROUP BY bidding_id, supp_id
+    </select>
+
+    <select id="fetchProFessionals" resultType="org.jeecg.modules.system.entity.SysUser">
+        select distinct su.* from bidding_professionals bp
+        left join sys_user su on bp.professional_id = su.username
+        where bp.del_flag = '0'
+        and bp.bidding_id = #{id}
+    </select>
+
+    <select id="fetchHasProfessionals" resultType="org.jeecg.modules.srm.entity.BiddingProfessionals">
+        select distinct professional_name,professional_id,bidding_evaluate_type from bidding_professionals
+        where del_flag = '0'
+        and bidding_id = #{id}
+        and status = '1'
+    </select>
+
+    <select id="fetchRecordToProfessionals" resultType="org.jeecg.modules.srm.entity.BiddingRecordToProfessionals">
+        SELECT
+            brtp.*
+        FROM
+            bidding_professionals bp
+            INNER JOIN bidding_record_to_professionals brtp ON bp.id = brtp.bps_id
+            AND brtp.del_flag = '0'
+        WHERE
+            bp.del_flag = '0'
+          AND bp.bidding_id = #{query.biddingId}
+          AND bp.professional_id = #{query.professionalId}
+    </select>
+
+    <select id="fetchSuppList" resultType="org.jeecg.modules.srm.entity.BasSupplier">
+        SELECT DISTINCT
+            bs.id,
+            bs.`name`
+        FROM
+            bidding_supplier bds
+            INNER JOIN bas_supplier bs ON bds.supplier_id = bs.id
+        WHERE
+            bds.del_flag = '0'
+            and bds.bidding_id = #{id}
+    </select>
+
+    <select id="fetchProFessionalsEmail" resultType="string">
+        SELECT
+            DISTINCT
+            su.email
+        FROM
+            bidding_professionals bp
+            inner join sys_user su on bp.professional_id = su.username
+        where bp.del_flag = '0'
+          and su.email is not null
+          and bp.bidding_id = #{id}
+    </select>
+</mapper>

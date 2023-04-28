@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.srm.mapper.SupQuoteMapper">
+    <select id="fetchPriceHistory" resultType="org.jeecg.modules.srm.entity.SupQuote">
+        SELECT
+            tp.currency,
+            tp.tax_rate,
+            tp.order_price_tax,
+            tp.trade_type,
+            tp.fare_amount,
+            tp.create_time,
+            tp.attachment
+        FROM
+            (
+                SELECT
+                    sq.currency,
+                    sq.tax_rate,
+                    sq.order_price_tax,
+                    sq.trade_type,
+                    sq.fare_amount,
+                    sq.create_time,
+                    sq.attachment
+                FROM
+                    sup_quote sq
+                WHERE
+                    sq.record_id = #{query.recordId}
+                  AND sq.supp_id = #{query.suppId}
+                UNION ALL
+                SELECT
+                    sq.currency,
+                    sb.tax_rate,
+                    sb.supp_order_price_tax AS order_price_tax,
+                    sq.trade_type,
+                    sb.supp_fare_amount AS fare_amount,
+                    sb.update_time AS create_time,
+                    sb.attachment
+                FROM
+                    sup_bargain sb
+                    INNER JOIN sup_quote sq ON sb.record_id = sq.record_id
+                    AND sb.supp_id = sq.supp_id
+                WHERE
+                    sb.record_id = #{query.recordId}
+                  AND sb.supp_id = #{query.suppId}
+                  AND sb.supp_order_price_tax IS NOT NULL
+            ) tp
+        ORDER BY
+            tp.create_time DESC
+    </select>
+
+    <select id="fetchPriceHistoryById" resultType="org.jeecg.modules.srm.entity.SupQuote">
+        SELECT
+            tp.currency,
+            tp.tax_rate,
+            tp.order_price_tax,
+            tp.supp_order_price_tax,
+            tp.trade_type,
+            tp.fare_amount,
+            tp.create_time,
+            bs.name as supp_name,
+            ir.prod_name,
+            ir.prod_code
+        FROM
+            (
+                SELECT
+                    sq.currency,
+                    sb.tax_rate,
+                    sb.order_price_tax as order_price_tax,
+                    sb.supp_order_price_tax AS supp_order_price_tax,
+                    sq.trade_type,
+                    sb.supp_fare_amount AS fare_amount,
+                    sb.update_time AS create_time,
+                    sb.supp_id,
+                    sq.record_id
+                FROM
+                    sup_bargain sb
+                    INNER JOIN sup_quote sq ON sb.record_id = sq.record_id
+                    AND sb.supp_id = sq.supp_id
+                WHERE
+                    sb.record_id in
+                    <foreach collection="ids" item="item" open="(" close=")" separator="," >
+                        #{item}
+                    </foreach>
+                  AND sb.supp_order_price_tax IS NOT NULL
+            ) tp
+            inner join bas_supplier bs on tp.supp_id = bs.id
+            inner join inquiry_record ir on tp.record_id = ir.id
+        ORDER BY
+            ir.prod_name,
+            tp.create_time DESC
+    </select>
+</mapper>

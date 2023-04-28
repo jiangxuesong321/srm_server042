@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.srm.mapper.ProjectBomRelationMapper">
+    <select id="fetchEqpPageList" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+        SELECT
+            pbm.qty,
+            pbm.budget_price,
+            pbm.budget_amount,
+            pbm.material_id,
+            pbm.material_id as id,
+            pbm.capacity,
+            bm.`name`,
+            bm.code,
+            bm.spe_type,
+            bm.model,
+            bm.country,
+            ifnull(tp.qty,0) as has_req_qty,
+            ifnull(co.qty,0) as has_buy_qty,
+            ifnull(sibe.qty,0) as stock_qty,
+            ifnull(co.qty,0) - ifnull(sibe.qty,0) as on_road_qty,
+            ifnull(tp.qty,0) - ifnull(co.qty,0) as remain_qty
+        FROM
+            project_bom_relation pbm
+            left join bas_material bm on pbm.material_id = bm.id
+            left join (
+                SELECT
+                    prm.project_id,
+                    prd.prod_id,
+                    sum( prd.qty ) AS qty
+                FROM
+                    purchase_request_detail prd
+                    LEFT JOIN purchase_request_main prm ON prd.req_id = prm.id
+                WHERE
+                    prm.req_type = '0'
+                    and prd.del_flag = '0'
+                GROUP BY
+                    prm.project_id,
+                    prd.prod_id
+            ) tp on pbm.material_id = tp.prod_id and pbm.proj_id = tp.project_id
+            left join (
+                SELECT
+                    cb.project_id,
+                    co.prod_code,
+                    sum(co.qty) as qty
+                FROM
+                    contract_object co
+                    LEFT JOIN contract_base cb ON co.contract_id = cb.id
+                WHERE
+                    co.del_flag = '0'
+                    AND cb.contract_status = '4'
+                GROUP BY
+                    cb.project_id,
+                    co.prod_code
+            ) co on bm.code = co.prod_code and pbm.proj_id = co.project_id
+            left join (
+                SELECT
+                    sibe.project_id,
+                    sibe.material_id,
+                    sum(sibe.qty) as qty
+                FROM
+                    stk_io_bill_entry sibe
+                WHERE
+                    sibe.del_flag = '0'
+                GROUP BY
+                    sibe.project_id,
+                    sibe.material_id
+            )sibe on pbm.material_id = sibe.material_id and pbm.proj_id = sibe.project_id
+        where pbm.del_flag = '0'
+          and pbm.proj_id = #{query.projId}
+          and pbm.category_id = #{query.categoryId}
+        <if test="query.code != null and query.code != ''">
+            AND bm.code LIKE concat(concat('%',#{query.code}),'%')
+        </if>
+        <if test="query.name != null and query.name != ''">
+            AND bm.name LIKE concat(concat('%',#{query.name}),'%')
+        </if>
+        <if test="query.model != null and query.model != ''">
+            AND bm.model = #{query.model}
+        </if>
+    </select>
+
+    <select id="fetchEqpPageListByProjId" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+        SELECT
+        pbm.qty,
+        pbm.qty - ifnull(tp.qty,0) as max_qty,
+        ifnull(tp.qty,0) as has_req_qty,
+        pbm.budget_price,
+        pbm.budget_amount,
+        pbm.material_id,
+        pbm.material_id as id,
+        pbm.capacity,
+        bm.`name`,
+        bm.code,
+        bm.spe_type,
+        bm.model,
+        bm.unit_id
+        FROM
+        project_bom_relation pbm
+        left join bas_material bm on pbm.material_id = bm.id
+        left join (
+            SELECT
+                prm.project_id,
+                prd.prod_id,
+                sum( ifnull(bi.qty,prd.qty) ) AS qty,
+                prm.category_id
+            FROM
+                purchase_request_detail prd
+                LEFT JOIN purchase_request_main prm ON prd.req_id = prm.id
+                LEFT JOIN (
+                    select ir.to_record_id,sum(iss.inquiry_qty) as qty from inquiry_record ir
+                    inner join inquiry_supplier iss on ir.id = iss.record_id
+                    where ir.del_flag = '0'
+                    and iss.is_recommend = '1'
+                    and iss.status = '4'
+                    group by ir.to_record_id
+                    union all
+                    select br.to_record_id,sum(brs.bidding_qty) as qty from bidding_record br
+                    inner join bidding_record_supplier brs on br.id = brs.record_id
+                    where br.del_flag = '0'
+                    and brs.is_recommend = '1'
+                    group by br.to_record_id
+                ) bi on prd.id = bi.to_record_id
+            WHERE
+                prm.req_type = '0'
+                and prm.req_status != '4'
+                AND prd.del_flag = '0'
+                <if test="query.reqId != null and query.reqId != ''">
+                    AND prm.id != #{query.reqId}
+                </if>
+            GROUP BY
+                prm.project_id,
+                prd.prod_id,
+                prm.category_id
+        ) tp on pbm.material_id = tp.prod_id and pbm.proj_id = tp.project_id AND pbm.category_id = tp.category_id
+        where pbm.del_flag = '0'
+        and pbm.proj_id = #{query.projId}
+        and pbm.category_id = #{query.categoryId}
+        and pbm.qty - ifnull(tp.qty,0) > 0
+        <if test="query.code != null and query.code != ''">
+            AND bm.code LIKE concat(concat('%',#{query.code}),'%')
+        </if>
+        <if test="query.name != null and query.name != ''">
+            AND bm.name LIKE concat(concat('%',#{query.name}),'%')
+        </if>
+        <if test="query.model != null and query.model != ''">
+            AND bm.model = #{query.model}
+        </if>
+    </select>
+
+    <select id="fetchTotalEqp" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+        SELECT
+            pb.buy_amount as budget_amount,
+            pb.buy_amount - ifnull(tp.order_total_amount_tax,0) as remain_amount
+        FROM
+            proj_base pb
+            LEFT JOIN (
+                SELECT
+                    prm.project_id,
+                    sum( prm.order_total_amount_tax ) AS order_total_amount_tax
+                FROM
+                    purchase_request_main prm
+                WHERE
+                    prm.req_type = '0'
+                  AND prm.del_flag = '0'
+                GROUP BY
+                    prm.project_id
+            ) tp on pb.id = tp.project_id
+        WHERE
+            pb.id = #{query.projId}
+    </select>
+
+    <select id="fetchBomList" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+        SELECT
+            pbm.*,
+            bm.`name`,
+            bm.code,
+            bm.spe_type,
+            bm.unit_id,
+            bm.category_name
+        FROM
+            project_bom_relation pbm
+            left join bas_material bm on pbm.material_id = bm.id
+        where pbm.del_flag = '0'
+        and pbm.category_id in
+        <foreach collection="ids" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="fetchEqpList" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+        select
+           pbm.*,
+           bm.code,
+           bm.spe_type,
+           pc.name as category_name,
+           sdi.item_text as unit_name
+        from project_bom_relation pbm
+        inner join bas_material bm on pbm.material_id = bm.id
+        inner join project_category pc on pbm.category_id = pc.id
+        left join sys_dict_item sdi ON bm.unit_id = sdi.item_value and sdi.dict_id = (
+            select sd.id from sys_dict sd
+            where sd.dict_code = 'unit'
+        )
+        where pbm.del_flag = '0'
+        and pbm.proj_id = #{query.id}
+    </select>
+
+    <select id="fetchTotalQty" resultType="map">
+        SELECT
+        sum(pbm.qty) as qty,
+        sum(ifnull(tp.qty,0)) as hasReqQty,
+        sum(ifnull(co.qty,0)) as hasBuyQty,
+        sum(ifnull(sibe.qty,0)) as stockQty,
+        sum(ifnull(co.qty,0) - ifnull(sibe.qty,0)) as onRoadQty,
+        sum(ifnull(tp.qty,0) - ifnull(co.qty,0)) as remainQty
+        FROM
+        project_bom_relation pbm
+        left join bas_material bm on pbm.material_id = bm.id
+        left join (
+            SELECT
+            prm.project_id,
+            prd.prod_id,
+            sum( prd.qty ) AS qty
+            FROM
+            purchase_request_detail prd
+            LEFT JOIN purchase_request_main prm ON prd.req_id = prm.id
+            WHERE
+            prm.req_type = '0'
+            and prd.del_flag = '0'
+            GROUP BY
+            prm.project_id,
+            prd.prod_id
+        ) tp on pbm.material_id = tp.prod_id and pbm.proj_id = tp.project_id
+        left join (
+            SELECT
+            cb.project_id,
+            co.prod_code,
+            sum(co.qty) as qty
+            FROM
+            contract_object co
+            LEFT JOIN contract_base cb ON co.contract_id = cb.id
+            WHERE
+            co.del_flag = '0'
+            AND cb.contract_status = '4'
+            GROUP BY
+            cb.project_id,
+            co.prod_code
+        ) co on bm.code = co.prod_code and pbm.proj_id = co.project_id
+        left join (
+            SELECT
+            sibe.project_id,
+            sibe.material_id,
+            sum(sibe.qty) as qty
+            FROM
+            stk_io_bill_entry sibe
+            WHERE
+            sibe.del_flag = '0'
+            GROUP BY
+            sibe.project_id,
+            sibe.material_id
+        )sibe on pbm.material_id = sibe.material_id and pbm.proj_id = sibe.project_id
+        where pbm.del_flag = '0'
+        and pbm.proj_id = #{query.projId}
+        and pbm.category_id = #{query.categoryId}
+        <if test="query.code != null and query.code != ''">
+            AND bm.code LIKE concat(concat('%',#{query.code}),'%')
+        </if>
+        <if test="query.name != null and query.name != ''">
+            AND bm.name LIKE concat(concat('%',#{query.name}),'%')
+        </if>
+        <if test="query.model != null and query.model != ''">
+            AND bm.model = #{query.model}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.srm.mapper.PurPayApplyDetailMapper">
+
+	<delete id="deleteByMainId" parameterType="java.lang.String">
+		DELETE 
+		FROM  pur_pay_apply_detail 
+		WHERE
+			 apply_id = #{mainId} 	</delete>
+	
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.PurPayApplyDetail">
+		SELECT
+			ppad.id,
+			ppad.bill_detail_id,
+			ppad.apply_id,
+			ppad.no,
+			ppad.send_time,
+			ppad.plan_lead_time,
+			ppad.contract_amount_tax,
+			ppad.pay_rate,
+			ppad.qty,
+			ppad.pay_type,
+			co.prod_code,
+			co.prod_name,
+			ifnull(co.prod_spec_type,co1.prod_spec_type) as spe_type,
+			co.unit_id,
+			co.contract_amount_tax as price_tax
+		FROM
+			pur_pay_apply_detail ppad
+			left join contract_object_qty co on ppad.bill_detail_id = co.id
+			left join contract_object co1 on co.record_id = co1.id
+		where ppad.del_flag = '0'
+			and ppad.apply_id = #{mainId}
+		order by co.prod_code,ppad.no + '0'
+	</select>
+</mapper>

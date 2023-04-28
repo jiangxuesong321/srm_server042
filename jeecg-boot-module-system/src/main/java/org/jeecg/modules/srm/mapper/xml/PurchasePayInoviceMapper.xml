@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.srm.mapper.PurchasePayInoviceMapper">
+    <select id="queryPurPayInvoiceDetailByMainId" resultType="org.jeecg.modules.srm.entity.ContractObject">
+        SELECT
+            co.id,
+            co.contract_id,
+            co.object_type,
+            co.prod_code,
+            co.prod_name,
+            co.contract_price,
+            co.contract_price_tax,
+            co.contract_amount,
+            co.contract_amount_tax,
+            co.contract_tax_rate,
+            co.prod_brand,
+            co.prod_spec_type,
+            co.exchange_rate,
+            co.contract_price_local,
+            co.contract_price_tax_local,
+            co.contract_amount_local,
+            co.contract_amount_tax_local,
+            co.require_date,
+            co.plan_delivery_date,
+            co.comment,
+            co.sort,
+            co.tenant_id,
+            co.del_flag,
+            co.create_user,
+            co.update_user,
+            co.create_time,
+            co.update_time,
+            co.to_record_id,
+            co.capacity,
+            co.unit_id,
+            co.pay_rate,
+            co.invoice_qty,
+            ppad.bill_detail_id,
+            ppad.qty,
+            ppad.invoice_tax,
+            ppad.invoice_rate
+        FROM
+            purchase_pay_invoice_detail ppad
+            left join contract_object_qty co on ppad.bill_detail_id = co.id
+        WHERE
+            ppad.invoice_id = #{id}
+          and ppad.del_flag = '0'
+    </select>
+
+    <select id="queryPurPayInvoiceByContractId" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+        SELECT
+            ppi.invoice_type,
+            ppi.invoice_tax,
+            ppi.invoice_amount,
+            ppi.invoice_amount_tax,
+            ppi.invoice_date
+        FROM
+            purchase_pay_inovice ppi
+        WHERE
+            ppi.del_flag = '0'
+            and ppi.status = '1'
+            and ppi.contract_id = #{id}
+    </select>
+
+    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+        select ppi.*,
+               cb.contract_number
+        from
+             purchase_pay_inovice ppi
+        left join contract_base cb on ppi.contract_id = cb.id
+        where ppi.del_flag = '0'
+        and ppi.status > 0
+        <if test="query.auth == 'subject'">
+            AND cb.contract_first_party_id in
+            <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.invoiceNo != null and query.invoiceNo != ''">
+            AND ppi.invoice_no LIKE concat(concat('%',#{query.invoiceNo}),'%')
+        </if>
+        <if test="query.invoiceDate != null">
+            AND ppi.invoice_date = #{query.invoiceDate}
+        </if>
+        <if test="query.supplierName != null and query.supplierName != ''">
+            AND ppi.supplier_name LIKE concat(concat('%',#{query.supplierName}),'%')
+        </if>
+        <if test="query.projectId != null and query.projectId != ''">
+            AND ppi.project_id in
+            <foreach collection="query.projectId.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.contractName != null and query.contractName != ''">
+            AND ppi.contract_name LIKE concat(concat('%',#{query.contractName}),'%')
+        </if>
+        <if test="query.contractNumber != null and query.contractNumber != ''">
+            AND cb.contract_number LIKE concat(concat('%',#{query.contractNumber}),'%')
+        </if>
+
+        <if test="query.column != null and query.column != ''">
+            <if test="query.column == 'invoiceNo'">
+                order by ppi.invoice_no
+            </if>
+            <if test="query.column == 'projectName'">
+                order by ppi.project_name
+            </if>
+            <if test="query.column == 'contractName'">
+                order by cb.contract_name
+            </if>
+            <if test="query.column == 'contractNumber'">
+                order by cb.contract_number
+            </if>
+            <if test="query.column == 'supplierName'">
+                order by ppi.supplier_name
+            </if>
+            <if test="query.column == 'invoiceType'">
+                order by ppi.invoice_type
+            </if>
+            <if test="query.column == 'currency'">
+                order by ppi.currency
+            </if>
+            <if test="query.column == 'invoiceAmount'">
+                order by ppi.invoice_amount
+            </if>
+            <if test="query.column == 'invoiceAmountTax'">
+                order by ppi.invoice_amount_tax
+            </if>
+            <if test="query.column == 'invoiceDate'">
+                order by ppi.invoice_date
+            </if>
+            <if test="query.column == 'taxRate'">
+                order by ppi.tax_rate
+            </if>
+            <if test="query.column == 'createTime'">
+                order by ppi.create_time
+            </if>
+            <if test="query.order == 'asc'">
+                asc
+            </if>
+            <if test="query.order == 'desc'">
+                desc
+            </if>
+
+        </if>
+    </select>
+
+    <select id="fetchInvoiceByProjId" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+        SELECT
+            sum(invoice_amount_tax_local) as invoice_amount_tax_local
+        FROM
+            purchase_pay_inovice ppi
+        where ppi.del_flag = '0'
+        <if test="query.projectId !=null and query.projectId != ''">
+            and ppi.project_id = #{query.projectId}
+        </if>
+    </select>
+
+    <select id="fetchAmountByModel" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+        SELECT
+            sum( ppid.contract_amount_tax_local ) AS invoice_amount_tax_local,
+            ppi.project_id as proj_id,
+            bm.model
+        FROM
+            purchase_pay_invoice_detail ppid
+            INNER JOIN purchase_pay_inovice ppi ON ppid.invoice_id = ppi.id
+            INNER JOIN contract_object_qty coq ON ppid.bill_detail_id = coq.id
+            INNER JOIN bas_material bm ON coq.prod_code = bm.`code`
+        WHERE
+            ppid.del_flag = '0'
+            and ppi.project_id = #{query.projectId}
+        GROUP BY
+            ppi.project_id,
+            bm.model
+    </select>
+
+    <select id="fetchAmountByCategory" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+        SELECT
+            sum( ppid.contract_amount_tax_local ) AS invoice_amount_tax_local,
+            cb.project_id,
+            cb.category_id
+        FROM
+            purchase_pay_invoice_detail ppid
+            INNER JOIN purchase_pay_inovice ppi ON ppid.invoice_id = ppi.id
+            INNER JOIN contract_base cb on ppi.contract_id = cb.id
+        WHERE
+            ppid.del_flag = '0'
+          and cb.project_id = #{query.projectId}
+        GROUP BY
+            cb.project_id,
+            cb.category_id
+    </select>
+
+    <select id="queryList" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+        select ppi.*,
+        cb.contract_number
+        from
+        purchase_pay_inovice ppi
+        left join contract_base cb on ppi.contract_id = cb.id
+        where ppi.del_flag = '0'
+        and ppi.status > 0
+        <if test="query.auth == 'subject'">
+            AND cb.contract_first_party_id in
+            <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.invoiceNo != null and query.invoiceNo != ''">
+            AND ppi.invoice_no LIKE concat(concat('%',#{query.invoiceNo}),'%')
+        </if>
+        <if test="query.invoiceDate != null">
+            AND ppi.invoice_date = #{query.invoiceDate}
+        </if>
+        <if test="query.supplierName != null and query.supplierName != ''">
+            AND ppi.supplier_name LIKE concat(concat('%',#{query.supplierName}),'%')
+        </if>
+        <if test="query.projectId != null and query.projectId != ''">
+            AND ppi.project_id in
+            <foreach collection="query.projectId.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.contractName != null and query.contractName != ''">
+            AND ppi.contract_name LIKE concat(concat('%',#{query.contractName}),'%')
+        </if>
+        <if test="query.contractNumber != null and query.contractNumber != ''">
+            AND cb.contract_number LIKE concat(concat('%',#{query.contractNumber}),'%')
+        </if>
+
+        <if test="query.column != null and query.column != ''">
+            <if test="query.column == 'invoiceNo'">
+                order by ppi.invoice_no
+            </if>
+            <if test="query.column == 'projectName'">
+                order by ppi.project_name
+            </if>
+            <if test="query.column == 'contractName'">
+                order by cb.contract_name
+            </if>
+            <if test="query.column == 'contractNumber'">
+                order by cb.contract_number
+            </if>
+            <if test="query.column == 'supplierName'">
+                order by ppi.supplier_name
+            </if>
+            <if test="query.column == 'invoiceType'">
+                order by ppi.invoice_type
+            </if>
+            <if test="query.column == 'currency'">
+                order by ppi.currency
+            </if>
+            <if test="query.column == 'invoiceAmount'">
+                order by ppi.invoice_amount
+            </if>
+            <if test="query.column == 'invoiceAmountTax'">
+                order by ppi.invoice_amount_tax
+            </if>
+            <if test="query.column == 'invoiceDate'">
+                order by ppi.invoice_date
+            </if>
+            <if test="query.column == 'taxRate'">
+                order by ppi.tax_rate
+            </if>
+            <if test="query.column == 'createTime'">
+                order by ppi.create_time
+            </if>
+            <if test="query.order == 'asc'">
+                asc
+            </if>
+            <if test="query.order == 'desc'">
+                desc
+            </if>
+
+        </if>
+    </select>
+</mapper>
