@@ -76,4 +76,13 @@ public class BasMaterialCategory implements Serializable {
     @ApiModelProperty(value = "版本")
     private Integer version;
 
+    /**是否启用*/
+    @Excel(name = "是否启用", width = 15)
+    @ApiModelProperty(value = "是否启用")
+    private Integer isEnabled4Buyer;
+
+    /**采购*/
+    @Excel(name = "采购", width = 15)
+    @ApiModelProperty(value = "采购")
+    private String buyerIds;
 }
