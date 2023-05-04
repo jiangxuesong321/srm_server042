@@ -68,6 +68,9 @@ public class BasSupplierController {
 	@Autowired
 	private IBasSupplierFastService iBasSupplierFastService;
 
+	 @Autowired
+	 private IBasSupplierResumeService basSupplierResumeService;
+
 	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	/**
 	 * 分页列表查询
@@ -560,5 +563,19 @@ public class BasSupplierController {
 															 HttpServletRequest req) {
 		 Map<String,Object> pageList = basSupplierService.fetchSuppActive(basSupplier);
 		 return Result.OK(pageList);
+	 }
+
+	 /**
+	  * 通过id查询
+	  *
+	  * @param id
+	  * @return
+	  */
+	 //@AutoLog(value = "供应商资质证书通过主表ID查询")
+	 @ApiOperation(value="供应商资质证书主表ID查询", notes="供应商资质证书-通主表ID查询")
+	 @GetMapping(value = "/queryBasSupplierResumeByMainId")
+	 public Result<List<BasSupplierResume>> queryBasSupplierResumeByMainId(@RequestParam(name="id",required=true) String id) {
+		 List<BasSupplierResume> basSupplierResumeList = basSupplierResumeService.selectByMainId(id);
+		 return Result.OK(basSupplierResumeList);
 	 }
 }

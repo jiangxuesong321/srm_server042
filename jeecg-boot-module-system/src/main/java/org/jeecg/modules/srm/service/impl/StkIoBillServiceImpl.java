@@ -329,7 +329,7 @@ public class StkIoBillServiceImpl extends ServiceImpl<StkIoBillMapper, StkIoBill
 		iApproveRecordService.save(ar);
 
 		//SRM 推送接口sap收货
-		this.sendPOToSap(sib);
+//		this.sendPOToSap(sib);
 	}
 
 	public String sendPOToSap(StkIoBill stkIoBill) {

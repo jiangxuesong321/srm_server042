@@ -13,5 +13,19 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @Version: V1.0
  */
 public interface BasSupplierResumeMapper extends BaseMapper<BasSupplierResume> {
+    /**
+     * 通过主表id查询子表数据
+     *
+     * @param mainId 主表id
+     * @return List<BasSupplierResume>
+     */
+    public List<BasSupplierResume> selectByMainId(@Param("mainId") String mainId);
 
+    /**
+     * 通过主表id删除子表数据
+     *
+     * @param mainId 主表id
+     * @return boolean
+     */
+    public boolean deleteByMainId(@Param("mainId") String mainId);
 }

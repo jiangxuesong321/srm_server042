@@ -269,6 +269,7 @@ public class BasSupplierServiceImpl extends ServiceImpl<BasSupplierMapper, BasSu
 		List<String> codeList = new ArrayList<>();
 		codeList.add("supp_prop");
 		codeList.add("supp_type");
+		codeList.add("supp_grade");
 		List<DictModelMany> dictList = iSysDictService.getDictItemsByCodeList(codeList);
 		Map<String,String> map = dictList.stream().collect(Collectors.toMap(DictModelMany::getValue, DictModelMany::getText));
 		if(pageList != null && pageList.size() > 0){
@@ -292,6 +293,12 @@ public class BasSupplierServiceImpl extends ServiceImpl<BasSupplierMapper, BasSu
 						}
 					}
 
+				}
+				if (bs.getSupplierGrade() != null){
+					String suppGrade = map.get(bs.getSupplierGrade());
+					if(StringUtils.isNotEmpty(suppGrade)){
+						bs.setSupplierGradeDict(suppGrade);
+					}
 				}
 			}
 		}

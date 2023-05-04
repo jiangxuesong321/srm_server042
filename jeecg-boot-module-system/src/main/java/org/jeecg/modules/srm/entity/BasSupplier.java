@@ -239,4 +239,12 @@ public class BasSupplier implements Serializable {
     @TableField(exist = false)
     private BigDecimal payAmount;
 
+    /**供应商等级*/
+    @Dict(dicCode = "supplier_grade")
+    @ApiModelProperty(value = "供应商等级")
+    private String supplierGrade;
+
+    @TableField(exist = false)
+    private String supplierGradeDict;
+
 }

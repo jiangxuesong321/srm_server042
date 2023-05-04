@@ -184,6 +184,7 @@
 				<configuration>
 					<!--SpringCloud运行环境 ,值改为true跳过SpringBoot启动打包插件 -->
 					<skip>${skip.springboot.maven}</skip>
+					<includeSystemScope>true</includeSystemScope>
 				</configuration>
 			</plugin>
 		</plugins>

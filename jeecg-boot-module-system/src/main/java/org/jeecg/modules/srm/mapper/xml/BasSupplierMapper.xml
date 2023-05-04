@@ -39,6 +39,7 @@
            bsp.pay_time,
            bsp.start_time,
            bsp.end_time,
+           bs.supplier_grade,
            ifnull(cb.num,0) as num,
            ifnull(cb1.numing,0) as numing,
            ifnull(cb2.contract_amount_tax_local,0) as contract_amount_tax_local,

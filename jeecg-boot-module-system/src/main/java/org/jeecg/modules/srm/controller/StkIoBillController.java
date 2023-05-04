@@ -11,10 +11,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sap.conn.jco.*;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,11 +30,16 @@ import org.jeecg.common.util.FillRuleUtil;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.message.handle.impl.EmailSendMsgHandle;
 import org.jeecg.modules.srm.entity.*;
+import org.jeecg.modules.srm.mapper.StkIoBillEntryMapper;
 import org.jeecg.modules.srm.service.*;
 import org.jeecg.modules.srm.utils.JeecgEntityExcel;
+import org.jeecg.modules.srm.utils.SAPConnUtil;
+import org.jeecg.modules.srm.utils.SapConn;
 import org.jeecg.modules.srm.vo.StkIoBillPage;
 import org.jeecg.modules.srm.vo.StkIoBillVo;
+import org.jeecg.modules.system.entity.PurchaseOrderMain;
 import org.jeecg.modules.system.entity.SysUser;
+import org.jeecg.modules.system.mapper.PurchaseOrderMainMapper;
 import org.jeecg.modules.system.service.ISysUserService;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
@@ -87,6 +94,12 @@ public class StkIoBillController {
 	private ISysUserService iSysUserService;
 	@Autowired
 	private IBasSupplierContactService iBasSupplierContactService;
+
+	 @Autowired
+	 private StkIoBillEntryMapper stkIoBillEntryMapper;
+
+	 @Autowired
+	 private PurchaseOrderMainMapper purchaseOrderMainMapper;
 
 	/**
 	 * 分页列表查询
@@ -614,8 +627,64 @@ public class StkIoBillController {
 			 }
 			 stkIoBillEntryService.updateBatchById(stkIoBillEntryList);
 		 }
-
+		 //SRM 推送接口sap收货
+		 if (stkIoBill.getApproverId() != null && stkIoBill.getApproverId().equals("project_center")) {
+			 this.sendPOToSap(stkIoBill);
+		 }
 		 return Result.OK("编辑成功!");
+	 }
+
+	 public String sendPOToSap(StkIoBill stkIoBill) {
+		 //查询收货单列表
+		 List<StkIoBillEntry> sbeList = stkIoBillEntryMapper.selectByMainId(stkIoBill.getId());
+
+		 //查找po号
+		 try {
+			 LambdaQueryWrapper<PurchaseOrderMain> qy = new LambdaQueryWrapper<>();
+			 qy.eq(PurchaseOrderMain::getContactId, stkIoBill.getContractId());
+			 PurchaseOrderMain purchaseOrderMain = purchaseOrderMainMapper.selectOne(qy);
+			 String po = purchaseOrderMain.getSapPo();
+
+			 String JCO_HOST = "192.168.1.20";
+			 String JCO_SYNSNR = "00";
+			 String JCO_CLIENT = "200";
+			 String JCO_USER = "DLW_PDA";
+			 String JCO_PASSWD = "Delaware.001";
+			 String JCO_LANG = "ZH";
+			 String JCO_POOL_CAPACITY = "30";
+			 String JCO_PEAK_LIMIT = "100";
+			 String JCO_SAPROUTER = "/H/112.103.135.101/S/3299/W/Dch2017";
+
+			 SapConn con = new SapConn(JCO_HOST, JCO_SYNSNR, JCO_CLIENT, JCO_USER, JCO_PASSWD, JCO_LANG, JCO_POOL_CAPACITY, JCO_PEAK_LIMIT, JCO_SAPROUTER);
+			 JCoDestination jCoDestination = SAPConnUtil.connect(con);
+
+			 // 获取调用 RFC 函数对象
+			 JCoFunction func = jCoDestination.getRepository().getFunction("ZCFIFUN_MM_PO_DELIVERY");
+			 // 配置传入参数抬头信息
+			 JCoParameterList importParameterList = func.getImportParameterList();
+			 JCoStructure sc = importParameterList.getStructure("IS_HEAD");
+			 sc.setValue("EBELN", po);
+
+			 //行项目
+			 JCoParameterList tableList =   func.getTableParameterList();
+			 JCoTable item_table =  tableList.getTable("IT_ITEM");
+			 for (int i = 0; i< sbeList.size();i++){
+				 item_table.appendRow();
+				 item_table.setValue("ERFMG", sbeList.get(i).getQty());
+//					item_table.setValue("MATNR", "10000045");
+				 item_table.setValue("EBELN", po);
+				 item_table.setValue("MATNR", sbeList.get(i).getProdCode());
+
+				 System.out.println("EBELN"+ po);
+				 System.out.println("MATNR"+ sbeList.get(i).getProdCode());
+				 System.out.println("ERFMG"+ sbeList.get(i).getQty());
+			 }
+			 // 调用并获取返回值
+			 func.execute(jCoDestination);
+		 } catch (Exception e) {
+			 e.printStackTrace();
+		 }
+		 return "";
 	 }
 
 
