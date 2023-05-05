@@ -84,4 +84,8 @@ public class PurchaseOrderMain {
     @ApiModelProperty(value = "合同编码")
     private String sapPo;
 
+    @Excel(name = "询价单号", width = 15)
+    @ApiModelProperty(value = "询价单号")
+    private String inquiryCode;
+
 }

@@ -1,10 +1,12 @@
 package org.jeecg.modules.srm.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sap.conn.jco.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.jeecg.common.api.dto.message.MessageDTO;
@@ -14,13 +16,19 @@ import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.common.util.FillRuleUtil;
 import org.jeecg.modules.message.handle.impl.EmailSendMsgHandle;
 import org.jeecg.modules.srm.entity.*;
+import org.jeecg.modules.srm.mapper.BasSupplierMapper;
 import org.jeecg.modules.srm.mapper.InquiryRecordMapper;
 import org.jeecg.modules.srm.mapper.InquirySupplierMapper;
 import org.jeecg.modules.srm.mapper.InquiryListMapper;
 import org.jeecg.modules.srm.service.*;
+import org.jeecg.modules.srm.utils.SAPConnUtil;
+import org.jeecg.modules.srm.utils.SapConn;
+import org.jeecg.modules.srm.vo.FixBiddingPage;
 import org.jeecg.modules.srm.vo.InquiryListPage;
+import org.jeecg.modules.system.entity.PurchaseOrderMain;
 import org.jeecg.modules.system.entity.SysDepart;
 import org.jeecg.modules.system.entity.SysUser;
+import org.jeecg.modules.system.mapper.PurchaseOrderMainMapper;
 import org.jeecg.modules.system.service.ISysDepartService;
 import org.jeecg.modules.system.service.ISysUserService;
 import org.springframework.beans.BeanUtils;
@@ -75,6 +83,12 @@ public class InquiryListServiceImpl extends ServiceImpl<InquiryListMapper, Inqui
 	private ISysDepartService iSysDepartService;
 	@Autowired
 	private ISupQuoteService iSupQuoteService;
+
+	@Autowired
+	private BasSupplierMapper basSupplierMapper;
+
+	@Autowired
+	private PurchaseOrderMainMapper purchaseOrderMainMapper;
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
@@ -460,6 +474,7 @@ public class InquiryListServiceImpl extends ServiceImpl<InquiryListMapper, Inqui
 		if(quoteList != null && quoteList.size() > 0){
 			iSupQuoteService.saveOrUpdateBatch(quoteList);
 		}
+		createPo(page);
 
 //		PurchaseRequestMain main = iPurchaseRequestMainService.getById(inquiryList.getRequestId());
 //		ProjBase projBase = iProjBaseService.getById(main.getProjectId());
@@ -508,6 +523,102 @@ public class InquiryListServiceImpl extends ServiceImpl<InquiryListMapper, Inqui
 
 	}
 
+	public void createPo(InquiryListPage page) {
+
+		try {
+			PurchaseOrderMain purchaseOrderMain = new PurchaseOrderMain();
+			//合同编号
+			JSONObject formData = new JSONObject();
+			formData.put("prefix", "PO");
+			String code = (String) FillRuleUtil.executeRule("po_code", formData);
+			purchaseOrderMain.setOrderNumber(code);
+			String JCO_HOST = "192.168.1.20";
+			String JCO_SYNSNR = "00";
+			String JCO_CLIENT = "200";
+			String JCO_USER = "DLW_PDA";
+			String JCO_PASSWD = "Delaware.001";
+			String JCO_LANG = "ZH";
+			String JCO_POOL_CAPACITY = "30";
+			String JCO_PEAK_LIMIT = "100";
+			String JCO_SAPROUTER = "/H/112.103.135.101/S/3299/W/Dch2017";
+
+			SapConn con = new SapConn(JCO_HOST, JCO_SYNSNR, JCO_CLIENT, JCO_USER, JCO_PASSWD, JCO_LANG, JCO_POOL_CAPACITY, JCO_PEAK_LIMIT, JCO_SAPROUTER);
+			JCoDestination jCoDestination = SAPConnUtil.connect(con);
+
+			// 获取调用 RFC 函数对象
+			JCoFunction func = jCoDestination.getRepository().getFunction("ZMM_OA_PO_CRT");
+			// 配置传入参数抬头信息
+			JCoParameterList importParameterList = func.getImportParameterList();
+			JCoStructure sc = importParameterList.getStructure("IS_HEAD");
+			sc.setValue("ZCONTRACT", purchaseOrderMain.getOrderNumber());
+
+			//行项目
+			JCoParameterList tableList =   func.getTableParameterList();
+			JCoTable item_table =  tableList.getTable("IT_ITEM");
+
+			//询价的明细项目
+			List<InquiryRecord> pageList = page.getRecordList();
+			String suppCode = "";
+			String suppId = "";
+			for (InquiryRecord inquiryRecord : pageList) {
+				item_table.appendRow();
+				item_table.setValue("MATNR", inquiryRecord.getProdCode());
+
+				SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMdd");
+				String strDate1 = sdf1.format(inquiryRecord.getLeadTime());
+				item_table.setValue("EINDT", strDate1);
+				System.out.println("EINDT--" + strDate1);
+
+				List<InquirySupplier> ISList = inquiryRecord.getSuppList();
+				for (InquirySupplier inquirySupplier : ISList) {
+					if (inquirySupplier.getIsRecommend() == 1){
+						item_table.setValue("MENGE", inquirySupplier.getInquiryQty());
+						LambdaQueryWrapper<BasSupplier> query = new LambdaQueryWrapper<>();
+						query.eq(BasSupplier::getId, inquirySupplier.getSupplierId());
+						BasSupplier baseSupplier = basSupplierMapper.selectOne(query);
+						suppId = baseSupplier.getId();
+						item_table.setValue("LIFNR", baseSupplier.getCode());
+
+						item_table.setValue("NETPR", inquirySupplier.getOrderPriceTax());
+						System.out.println("NETPR--"+ inquirySupplier.getOrderPriceTax());
+
+						if ("0".equals(inquirySupplier.getTaxRate().toString())) {
+							item_table.setValue("MWSKZ", "J0");
+							System.out.println("MWSKZ"+ inquirySupplier.getTaxRate());
+						}
+						if ("13".equals(inquirySupplier.getTaxRate().toString())) {
+							item_table.setValue("MWSKZ", "J1");
+							System.out.println("MWSKZ"+ inquirySupplier.getTaxRate());
+						}
+
+						break;
+					}
+				}
+			}
+
+			purchaseOrderMain.setOrderNumber(code);
+			purchaseOrderMain.setSupplierId(suppId);
+			//询价编码
+			purchaseOrderMain.setInquiryCode(page.getInquiryCode());
+			purchaseOrderMainMapper.insert(purchaseOrderMain);
+
+			// 调用并获取返回值
+			func.execute(jCoDestination);
+			// 获取 内表 - ET_MARA
+			JCoTable maraTable = func.getTableParameterList().getTable("ET_OUTPUT");
+			String po_sap = "";
+			for (int i = 0; i < maraTable.getNumRows(); i++) {
+				po_sap = maraTable.getString("EBELN");
+				break;
+			}
+			if (StringUtils.isNotEmpty(po_sap)){
+				purchaseOrderMain.setSapPo(po_sap);
+				purchaseOrderMainMapper.updateById(purchaseOrderMain);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * 发送公告
 	 * @param content

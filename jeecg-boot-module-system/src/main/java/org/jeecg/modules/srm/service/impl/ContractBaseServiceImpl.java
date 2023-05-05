@@ -364,6 +364,17 @@ public class ContractBaseServiceImpl extends ServiceImpl<ContractBaseMapper, Con
 			purchaseOrderMainMapper.updateById(purchaseOrderMain);
 		}
 
+		//询价比价生成合同更新
+		if (contractBase.getInquiryCode() != null){
+			LambdaQueryWrapper<PurchaseOrderMain> query1 = new LambdaQueryWrapper<>();
+			query1.eq(PurchaseOrderMain::getInquiryCode, contractBase.getInquiryCode());
+			PurchaseOrderMain purchaseOrderMain1 = purchaseOrderMainMapper.selectOne(query1);
+			if (purchaseOrderMain1 != null && purchaseOrderMain1.getInquiryCode() != null) {
+				purchaseOrderMain1.setContactId(contractBase.getId());
+				purchaseOrderMainMapper.updateById(purchaseOrderMain1);
+			}
+		}
+
 		//更新招标状态,已生成合同
 		if("1".equals(contractBase.getSource())){
 			BiddingSupplier supp = iBiddingSupplierService.getById(contractBase.getBsId());
