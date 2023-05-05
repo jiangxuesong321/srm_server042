@@ -23,6 +23,7 @@ import org.jeecg.modules.srm.service.*;
 import org.jeecg.modules.srm.utils.SAPConnUtil;
 import org.jeecg.modules.srm.utils.SapConn;
 import org.jeecg.modules.srm.vo.BiddingTemplatePage;
+import org.jeecg.modules.srm.vo.FixBiddingPage;
 import org.jeecg.modules.system.entity.PurchaseOrderMain;
 import org.jeecg.modules.system.entity.SysDepart;
 import org.jeecg.modules.system.entity.SysUser;
@@ -103,6 +104,7 @@ public class BiddingMainServiceImpl extends ServiceImpl<BiddingMainMapper, Biddi
 
 	@Autowired
 	private IBasMaterialService basMaterialService;
+
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
@@ -880,10 +882,12 @@ public class BiddingMainServiceImpl extends ServiceImpl<BiddingMainMapper, Biddi
 
 	}
 
-	public String sendBillNoToSap(BiddingSupplier page) {
+	public void sendBillNoToSap(BiddingSupplier page) {
 
 		try {
 			PurchaseOrderMain purchaseOrderMain = new PurchaseOrderMain();
+//			List<FixBiddingPage> pageList = biddingSupplierMapper.fetchFixBiddingList(page.getBiddingId());
+			List<BiddingRecord> pageList = iBiddingSupplierService.fetchFixBiddingList(page.getBiddingId());
 			//合同编号
 			JSONObject formData = new JSONObject();
 			formData.put("prefix", "PO");
@@ -928,6 +932,33 @@ public class BiddingMainServiceImpl extends ServiceImpl<BiddingMainMapper, Biddi
 //				item_table.setValue("LIFNR", "0000100561");
 				item_table.setValue("LIFNR", baseSupplier.getCode());
 				item_table.setValue("MENGE", page.getRecommendList().get(i).getBiddingQty());
+				for (BiddingRecord biddingRecord : pageList) {
+					if (biddingRecord.getId().equals(page.getRecommendList().get(i).getRecordId())){
+						List<FixBiddingPage> getList = biddingRecord.getChildList();
+
+						SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMdd");
+						String strDate1 = sdf1.format(biddingRecord.getLeadTime());
+						item_table.setValue("EINDT", strDate1);
+						System.out.println("EINDT--" + biddingRecord.getLeadTime());
+						for (FixBiddingPage fixBiddingPage : getList) {
+							if (fixBiddingPage.getId().equals(page.getRecommendList().get(i).getId())){
+								if ("0.00".equals(fixBiddingPage.getTaxRate())) {
+									item_table.setValue("MWSKZ", "J0");
+									System.out.println("MWSKZ"+ fixBiddingPage.getTaxRate());
+								}
+								if ("13.00".equals(fixBiddingPage.getTaxRate())) {
+									item_table.setValue("MWSKZ", "J1");
+									System.out.println("MWSKZ"+ fixBiddingPage.getTaxRate());
+								}
+
+								item_table.setValue("NETPR", fixBiddingPage.getPriceTax());
+								System.out.println("NETPR"+ fixBiddingPage.getPriceTax());
+								break;
+							}
+						}
+						break;
+					}
+				}
 
 				//获取物料的code
 				LambdaQueryWrapper<BiddingRecord> query1 = new LambdaQueryWrapper<>();
@@ -952,14 +983,13 @@ public class BiddingMainServiceImpl extends ServiceImpl<BiddingMainMapper, Biddi
 				po_sap = maraTable.getString("EBELN");
 				break;
 			}
-			if (StringUtils.isNotEmpty(po_sap)){
+				if (StringUtils.isNotEmpty(po_sap)){
 				purchaseOrderMain.setSapPo(po_sap);
 				purchaseOrderMainMapper.updateById(purchaseOrderMain);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
 	}
 
 	/**

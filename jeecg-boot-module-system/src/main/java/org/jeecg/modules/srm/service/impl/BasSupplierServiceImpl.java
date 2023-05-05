@@ -66,7 +66,7 @@ public class BasSupplierServiceImpl extends ServiceImpl<BasSupplierMapper, BasSu
 		formData.put("prefix", "S");
 		String code = (String) FillRuleUtil.executeRule("supp_code", formData);
 
-		basSupplier.setStatus(CommonConstant.STATUS_1);
+		basSupplier.setStatus(CommonConstant.STATUS_0);
 		basSupplier.setCode(code);
 		this.save(basSupplier);
 		if(basSupplierContactList!=null && basSupplierContactList.size()>0) {

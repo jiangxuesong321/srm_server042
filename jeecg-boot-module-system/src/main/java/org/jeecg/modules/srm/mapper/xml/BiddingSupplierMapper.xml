@@ -81,7 +81,7 @@
 
 	<select id="fetchFixBiddingList" resultType="org.jeecg.modules.srm.vo.FixBiddingPage">
 		SELECT
-		    case when (bm.bidding_status = '3' or bm.bidding_status = '2') then brs.is_recommend
+		    case when (bm.bidding_status = '3' or bm.bidding_status = '2' or bm.bidding_status = '8') then brs.is_recommend
 		    else brtp.is_recommend end is_recommend,
 			brs.id,
 			brs.record_id,

@@ -30,6 +30,7 @@ import org.jeecg.common.util.FillRuleUtil;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.message.handle.impl.EmailSendMsgHandle;
 import org.jeecg.modules.srm.entity.*;
+import org.jeecg.modules.srm.mapper.PurchaseOrderAndSapDocumentMapper;
 import org.jeecg.modules.srm.mapper.StkIoBillEntryMapper;
 import org.jeecg.modules.srm.service.*;
 import org.jeecg.modules.srm.utils.JeecgEntityExcel;
@@ -100,6 +101,9 @@ public class StkIoBillController {
 
 	 @Autowired
 	 private PurchaseOrderMainMapper purchaseOrderMainMapper;
+
+	 @Autowired
+	 private PurchaseOrderAndSapDocumentMapper purchaseOrderAndSapDocumentMapper;
 
 	/**
 	 * 分页列表查询
@@ -634,7 +638,7 @@ public class StkIoBillController {
 		 return Result.OK("编辑成功!");
 	 }
 
-	 public String sendPOToSap(StkIoBill stkIoBill) {
+	 public void sendPOToSap(StkIoBill stkIoBill) {
 		 //查询收货单列表
 		 List<StkIoBillEntry> sbeList = stkIoBillEntryMapper.selectByMainId(stkIoBill.getId());
 
@@ -681,10 +685,21 @@ public class StkIoBillController {
 			 }
 			 // 调用并获取返回值
 			 func.execute(jCoDestination);
+
+			 //获取返回值
+			 String materialDocument = func.getExportParameterList().getString("EV_MBLNR");
+			 String year = func.getExportParameterList().getString("EV_MJAHR");
+			 if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotEmpty(materialDocument)) {
+				 PurchaseOrderAndSapDocument purchaseOrderAndSapDocument = new PurchaseOrderAndSapDocument();
+				 BeanUtils.copyProperties(purchaseOrderMain, purchaseOrderAndSapDocument);
+				 purchaseOrderAndSapDocument.setMaterialDocument(materialDocument);
+				 purchaseOrderAndSapDocument.setYear(year);
+				 purchaseOrderAndSapDocument.setBillNo(stkIoBill.getBillNo());
+				 purchaseOrderAndSapDocumentMapper.insert(purchaseOrderAndSapDocument);
+			 }
 		 } catch (Exception e) {
 			 e.printStackTrace();
 		 }
-		 return "";
 	 }
 
 

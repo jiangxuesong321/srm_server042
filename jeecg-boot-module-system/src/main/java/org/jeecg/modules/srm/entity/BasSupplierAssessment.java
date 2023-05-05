@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -78,4 +79,11 @@ public class BasSupplierAssessment implements Serializable {
 	@Excel(name = "指标分类", width = 15)
     @ApiModelProperty(value = "指标分类")
     private String assessmentCategory;
+
+//    /**指标分类*/
+//    @Excel(name = "指标分类", width = 15)
+//    @ApiModelProperty(value = "指标分类")
+//    private String assessmentCategoryDict;
+    @TableField(exist = false)
+    private String assessmentCategoryDict;
 }

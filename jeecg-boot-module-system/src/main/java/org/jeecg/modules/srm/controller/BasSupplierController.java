@@ -161,6 +161,7 @@ public class BasSupplierController {
 		if(basSupplierEntity==null) {
 			return Result.error("未找到对应数据");
 		}
+		basSupplier.setStatus("0");
 		basSupplierService.updateMain(basSupplier, basSupplierPage.getBasSupplierContactList(),basSupplierPage.getBasSupplierQualificationList(),basSupplierPage.getBasSupplierBankList(),basSupplierPage.getBasSupplierFastList());
 		return Result.OK("编辑成功!");
 	}

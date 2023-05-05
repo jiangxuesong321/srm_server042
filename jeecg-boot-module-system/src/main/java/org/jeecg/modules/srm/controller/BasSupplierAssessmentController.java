@@ -1,5 +1,6 @@
 package org.jeecg.modules.srm.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -9,8 +10,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
+import org.jeecg.common.system.vo.DictModelMany;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.srm.entity.BasSupplierAssessment;
 import org.jeecg.modules.srm.service.IBasSupplierAssessmentService;
@@ -20,6 +24,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 
+import org.jeecg.modules.system.service.ISysDictService;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -49,7 +54,9 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 public class BasSupplierAssessmentController extends JeecgController<BasSupplierAssessment, IBasSupplierAssessmentService> {
 	@Autowired
 	private IBasSupplierAssessmentService basSupplierAssessmentService;
-	
+
+	 @Autowired
+	 private ISysDictService iSysDictService;
 	/**
 	 * 分页列表查询
 	 *
@@ -69,6 +76,19 @@ public class BasSupplierAssessmentController extends JeecgController<BasSupplier
 		QueryWrapper<BasSupplierAssessment> queryWrapper = QueryGenerator.initQueryWrapper(basSupplierAssessment, req.getParameterMap());
 		Page<BasSupplierAssessment> page = new Page<BasSupplierAssessment>(pageNo, pageSize);
 		IPage<BasSupplierAssessment> pageList = basSupplierAssessmentService.page(page, queryWrapper);
+		List<String> codeList = new ArrayList<>();
+		codeList.add("supp_appraise_rule");
+		List<DictModelMany> dictList = iSysDictService.getDictItemsByCodeList(codeList);
+		Map<String,String> map = dictList.stream().collect(Collectors.toMap(DictModelMany::getValue, DictModelMany::getText));
+		for (BasSupplierAssessment record : pageList.getRecords()) {
+			if (record.getAssessmentCategory() != null){
+				String assessmentCategoryDict = map.get(record.getAssessmentCategory());
+				if(StringUtils.isNotEmpty(assessmentCategoryDict)){
+					record.setAssessmentCategoryDict(assessmentCategoryDict);
+				}
+			}
+		}
+
 		return Result.OK(pageList);
 	}
 	
