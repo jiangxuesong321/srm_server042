@@ -15,9 +15,7 @@ import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.srm.entity.*;
 import org.jeecg.modules.srm.mapper.PurchasePayInoviceMapper;
-import org.jeecg.modules.srm.service.IContractObjectService;
-import org.jeecg.modules.srm.service.IPurchasePayInoviceService;
-import org.jeecg.modules.srm.service.IPurchasePayInvoiceDetailService;
+import org.jeecg.modules.srm.service.*;
 import org.jeecg.modules.srm.utils.JeecgEntityExcel;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -47,6 +45,10 @@ public class PurchasePayInoviceServiceImpl extends ServiceImpl<PurchasePayInovic
     private IPurchasePayInvoiceDetailService iPurchasePayInvoiceDetailService;
     @Autowired
     private IContractObjectService iContractObjectService;
+    @Autowired
+    private IStkIoBillEntryService iStkIoBillEntryService;
+    @Autowired
+    private IBasSupplierService iBasSupplierService;
 
     @Value("${jeecg.path.upload}")
     private String upLoadPath;
@@ -57,7 +59,46 @@ public class PurchasePayInoviceServiceImpl extends ServiceImpl<PurchasePayInovic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveInvoice(PurchasePayInovice purchasePayInovice) {
+        LoginUser loginUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+        String username = loginUser.getUsername();
+        Date nowTime = new Date();
 
+        //保存发票
+        String id = String.valueOf(IdWorker.getId());
+
+        BasSupplier bs = iBasSupplierService.getById(purchasePayInovice.getSupplierId());
+
+        purchasePayInovice.setId(id);
+        purchasePayInovice.setDelFlag(CommonConstant.NO_READ_FLAG);
+        purchasePayInovice.setCreateBy(username);
+        purchasePayInovice.setCreateTime(nowTime);
+        purchasePayInovice.setUpdateBy(username);
+        purchasePayInovice.setUpdateTime(nowTime);
+        purchasePayInovice.setStatus("1");
+        purchasePayInovice.setSupplierId(bs.getId());
+        purchasePayInovice.setSupplierName(bs.getName());
+
+        this.save(purchasePayInovice);
+
+
+
+        List<StkIoBillEntry> goodList = new ArrayList<>();
+        List<PurchasePayInvoiceDetail> detailList = purchasePayInovice.getDetailList();
+        for(PurchasePayInvoiceDetail pid : detailList){
+            pid.setId(String.valueOf(IdWorker.getId()));
+            pid.setInvoiceId(id);
+            pid.setDelFlag(CommonConstant.NO_READ_FLAG);
+            pid.setCreateBy(username);
+            pid.setCreateTime(nowTime);
+            pid.setUpdateBy(username);
+            pid.setUpdateTime(nowTime);
+
+            StkIoBillEntry sibe = iStkIoBillEntryService.getById(pid.getBillDetailId());
+            sibe.setInvoiceQty(sibe.getInvoiceQty().add(pid.getQty()));
+            goodList.add(sibe);
+        }
+        iPurchasePayInvoiceDetailService.saveOrUpdateBatch(detailList);
+        iStkIoBillEntryService.updateBatchById(goodList);
     }
 
     /**

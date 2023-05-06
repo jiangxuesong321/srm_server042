@@ -105,7 +105,7 @@ public class StkIoBillController {
 	 @Autowired
 	 private PurchaseOrderAndSapDocumentMapper purchaseOrderAndSapDocumentMapper;
 
-	/**
+	 /**
 	 * 分页列表查询
 	 *
 	 * @param stkIoBill
@@ -702,7 +702,6 @@ public class StkIoBillController {
 		 }
 	 }
 
-
 	 /**
 	  *  编辑
 	  *
@@ -817,6 +816,26 @@ public class StkIoBillController {
 //		 }
 
 		 return Result.OK("提交成功!");
+	 }
+
+	 /**
+	  * 入库明细
+	  *
+	  * @param stkIoBill
+	  * @param pageNo
+	  * @param pageSize
+	  * @param req
+	  * @return
+	  */
+	 @GetMapping(value = "/fetchDetailPageList")
+	 public Result<IPage<StkIoBillEntry>> fetchDetailPageList(StkIoBill stkIoBill,
+												   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
+												   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
+												   HttpServletRequest req) {
+
+		 Page<StkIoBill> page = new Page<StkIoBill>(pageNo, pageSize);
+		 IPage<StkIoBillEntry> pageList = stkIoBillService.fetchDetailPageList(page, stkIoBill);
+		 return Result.OK(pageList);
 	 }
 
  }

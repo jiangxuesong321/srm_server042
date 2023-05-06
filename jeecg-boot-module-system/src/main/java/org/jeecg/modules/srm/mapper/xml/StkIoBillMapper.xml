@@ -118,14 +118,14 @@
         <if test="query.auth == 'dept'">
             AND (select depart_ids from sys_user su where sib.create_by = su.username) = #{query.auther}
         </if>
-<!--        <if test="query.auth == 'subject'">-->
-<!--            AND exists (-->
-<!--                select pb.id from proj_base pb where sib.project_id = pb.id and pb.subject in-->
-<!--            <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >-->
-<!--                #{item}-->
-<!--            </foreach>-->
-<!--            )-->
-<!--        </if>-->
+        <if test="query.auth == 'subject'">
+            AND exists (
+                select pb.id from proj_base pb where sib.project_id = pb.id and pb.subject in
+            <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+            )
+        </if>
         <if test="query.column != null and query.column != ''">
             <if test="query.column == 'billNo'">
                 order by sib.bill_no
@@ -329,5 +329,33 @@
                 group by coq.prod_name,sibe.mid
             ) t
             group by t.mid
+    </select>
+
+
+    <select id="fetchDetailPageList" resultType="org.jeecg.modules.srm.entity.StkIoBillEntry">
+        SELECT
+            sibe.id,
+            sibe.qty,
+            sibe.prod_code,
+            sibe.prod_name,
+            sibe.invoice_rate,
+            sibe.invoice_qty,
+            coq.prod_spec_type,
+            cb.contract_name,
+            cb.contract_number,
+            cb.contract_tax_rate,
+            coq.contract_price,
+            coq.contract_price_tax,
+            coq.contract_amount,
+            coq.contract_amount_tax,
+            coq.contract_amount_tax - coq.contract_amount as contract_tax
+        FROM
+            stk_io_bill_entry sibe
+                inner join contract_object_qty coq on sibe.order_detail_id = coq.id
+                inner join contract_base cb on coq.contract_id = cb.id
+        WHERE sibe.del_flag = '0'
+          and cb.contract_second_party_id = #{query.suppId}
+          and cb.contract_currency = #{query.currency}
+          and sibe.qty > sibe.invoice_qty
     </select>
 </mapper>

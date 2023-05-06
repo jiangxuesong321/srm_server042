@@ -272,5 +272,7 @@ public class StkIoBill implements Serializable {
     /**是否需要发送邮件**/
     @TableField(exist = false)
     private String isSendMail;
+    @TableField(exist = false)
+    private String currency;
 
 }

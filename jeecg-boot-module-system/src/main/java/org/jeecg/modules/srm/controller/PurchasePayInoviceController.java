@@ -79,16 +79,16 @@ public class PurchasePayInoviceController extends JeecgController<PurchasePayIno
 		Page<PurchasePayInovice> page = new Page<PurchasePayInovice>(pageNo, pageSize);
 
 
-		String permission = iSysUserService.fetchPermission(username);
-		String auth = "subject";
-		String auther = loginUser.getRelTenantIds();
-		if(StringUtils.isNotEmpty(permission)){
-			if(permission.contains("invoice:all")){
-				auth = "all";
-			}
-		}
-		purchasePayInovice.setAuth(auth);
-		purchasePayInovice.setAuther(auther);
+//		String permission = iSysUserService.fetchPermission(username);
+//		String auth = "subject";
+//		String auther = loginUser.getRelTenantIds();
+//		if(StringUtils.isNotEmpty(permission)){
+//			if(permission.contains("invoice:all")){
+//				auth = "all";
+//			}
+//		}
+//		purchasePayInovice.setAuth(auth);
+//		purchasePayInovice.setAuther(auther);
 
 		IPage<PurchasePayInovice> pageList = purchasePayInoviceService.queryPageList(page, purchasePayInovice);
 		return Result.OK(pageList);

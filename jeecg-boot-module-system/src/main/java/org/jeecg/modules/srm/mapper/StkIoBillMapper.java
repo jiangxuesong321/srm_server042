@@ -61,4 +61,12 @@ public interface StkIoBillMapper extends BaseMapper<StkIoBill> {
      * @return
      */
     List<ContractObjectQty> queryOtherDetailsByIds(@Param("ids") List<String> ids);
+
+    /**
+     * 入库明细
+     * @param page
+     * @param stkIoBill
+     * @return
+     */
+    IPage<StkIoBillEntry> fetchDetailPageList(Page<StkIoBill> page, @Param("query") StkIoBill stkIoBill);
 }

@@ -34,49 +34,49 @@ public class PurchaseApplyInvoice implements Serializable {
 	/**id*/
 	@TableId(type = IdType.ASSIGN_ID)
     @ApiModelProperty(value = "id")
-    private java.lang.String id;
+    private String id;
 	/**开票ID*/
 	@Excel(name = "开票ID", width = 15)
     @ApiModelProperty(value = "开票ID")
-    private java.lang.String invoiceId;
+    private String invoiceId;
 	/**付款申请单号*/
 	@Excel(name = "付款申请单号", width = 15)
     @ApiModelProperty(value = "付款申请单号")
-    private java.lang.String applyId;
+    private String applyId;
 	/**开票金额（未税）*/
 	@Excel(name = "开票金额（未税）", width = 15)
     @ApiModelProperty(value = "开票金额（未税）")
-    private java.math.BigDecimal invoiceAmount;
+    private BigDecimal invoiceAmount;
 	/**开票金额（含税）*/
 	@Excel(name = "开票金额（含税）", width = 15)
     @ApiModelProperty(value = "开票金额（含税）")
-    private java.math.BigDecimal invoiceAmountTax;
+    private BigDecimal invoiceAmountTax;
 	/**开票金额（未税）*/
 	@Excel(name = "开票金额（未税）", width = 15)
     @ApiModelProperty(value = "开票金额（未税）")
-    private java.math.BigDecimal invoiceAmountLocal;
+    private BigDecimal invoiceAmountLocal;
 	/**开票金额（含税）*/
 	@Excel(name = "开票金额（含税）", width = 15)
     @ApiModelProperty(value = "开票金额（含税）")
-    private java.math.BigDecimal invoiceAmountTaxLocal;
+    private BigDecimal invoiceAmountTaxLocal;
 	/**创建时间*/
 	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern="yyyy-MM-dd")
     @ApiModelProperty(value = "创建时间")
-    private java.util.Date createTime;
+    private Date createTime;
 	/**创建人*/
     @ApiModelProperty(value = "创建人")
-    private java.lang.String createBy;
+    private String createBy;
 	/**更新时间*/
 	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern="yyyy-MM-dd")
     @ApiModelProperty(value = "更新时间")
-    private java.util.Date updateTime;
+    private Date updateTime;
 	/**更新人*/
     @ApiModelProperty(value = "更新人")
-    private java.lang.String updateBy;
+    private String updateBy;
 	/**删除标志*/
 	@Excel(name = "删除标志", width = 15)
     @ApiModelProperty(value = "删除标志")
-    private java.lang.String delFlag;
+    private String delFlag;
 }

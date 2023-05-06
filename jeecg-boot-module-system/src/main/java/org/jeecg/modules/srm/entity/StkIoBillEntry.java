@@ -58,7 +58,7 @@ public class StkIoBillEntry implements Serializable {
 	/**数量*/
 	@Excel(name = "数量", width = 15)
     @ApiModelProperty(value = "数量")
-    private java.math.BigDecimal qty;
+    private BigDecimal qty;
 	/**仓库*/
 	@Excel(name = "仓库", width = 15)
     @ApiModelProperty(value = "仓库")
@@ -124,35 +124,35 @@ public class StkIoBillEntry implements Serializable {
     /**合同未税单价原币*/
     @Excel(name = "合同未税单价原币", width = 15)
     @ApiModelProperty(value = "合同未税单价原币")
-    private java.math.BigDecimal contractPrice;
+    private BigDecimal contractPrice;
     /**合同含税单价原币*/
     @Excel(name = "合同含税单价原币", width = 15)
     @ApiModelProperty(value = "合同含税单价原币")
-    private java.math.BigDecimal contractPriceTax;
+    private BigDecimal contractPriceTax;
     /**合同总额未税原币*/
     @Excel(name = "合同总额未税原币", width = 15)
     @ApiModelProperty(value = "合同总额未税原币")
-    private java.math.BigDecimal contractAmount;
+    private BigDecimal contractAmount;
     /**合同总额含税原币*/
     @Excel(name = "合同总额含税原币", width = 15)
     @ApiModelProperty(value = "合同总额含税原币")
-    private java.math.BigDecimal contractAmountTax;
+    private BigDecimal contractAmountTax;
     /**合同未税单价本币*/
     @Excel(name = "合同未税单价本币", width = 15)
     @ApiModelProperty(value = "合同未税单价本币")
-    private java.math.BigDecimal contractPriceLocal;
+    private BigDecimal contractPriceLocal;
     /**合同含税单价本币*/
     @Excel(name = "合同含税单价本币", width = 15)
     @ApiModelProperty(value = "合同含税单价本币")
-    private java.math.BigDecimal contractPriceTaxLocal;
+    private BigDecimal contractPriceTaxLocal;
     /**合同总额未税本币*/
     @Excel(name = "合同总额未税本币", width = 15)
     @ApiModelProperty(value = "合同总额未税本币")
-    private java.math.BigDecimal contractAmountLocal;
+    private BigDecimal contractAmountLocal;
     /**合同总额含税本币*/
     @Excel(name = "合同总额含税本币", width = 15)
     @ApiModelProperty(value = "合同总额含税本币")
-    private java.math.BigDecimal contractAmountTaxLocal;
+    private BigDecimal contractAmountTaxLocal;
     /**其他费用总和**/
     private BigDecimal otherAmount;
     /**其他费用总和**/
@@ -203,4 +203,15 @@ public class StkIoBillEntry implements Serializable {
     private BigDecimal payRate;
     @TableField(exist = false)
     private BigDecimal amountTax;
+
+    private BigDecimal invoiceRate;
+    @TableField(exist = false)
+    private String contractName;
+    @TableField(exist = false)
+    private String contractNumber;
+    @TableField(exist = false)
+    private BigDecimal contractTaxRate;
+    @TableField(exist = false)
+    private BigDecimal contractTax;
+    private BigDecimal invoiceQty;
 }

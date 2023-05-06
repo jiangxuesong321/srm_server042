@@ -103,4 +103,12 @@ public interface IStkIoBillService extends IService<StkIoBill> {
 	 * @param stkIoBill
 	 */
 	void handleSendReject(StkIoBill stkIoBill);
+
+	/**
+	 *入库明细
+	 * @param page
+	 * @param stkIoBill
+	 * @return
+	 */
+    IPage<StkIoBillEntry> fetchDetailPageList(Page<StkIoBill> page, StkIoBill stkIoBill);
 }
