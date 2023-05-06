@@ -2,6 +2,7 @@ package org.jeecg.modules.srm.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.domain.ExchangeRate;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,7 +28,9 @@ import org.jeecg.modules.srm.service.*;
 import org.jeecg.modules.srm.utils.JeecgEntityExcel;
 import org.jeecg.modules.srm.vo.ContractBasePage;
 import org.jeecg.modules.srm.vo.ContractToInvoice;
+import org.jeecg.modules.system.entity.PurchaseOrderMain;
 import org.jeecg.modules.system.entity.SysDepart;
+import org.jeecg.modules.system.mapper.PurchaseOrderMainMapper;
 import org.jeecg.modules.system.service.ISysDepartService;
 import org.jeecg.modules.system.service.ISysDictService;
 import org.jeecg.modules.system.service.ISysUserService;
@@ -82,6 +85,9 @@ public class ContractBaseController {
 	private IBasSupplierContactService iBasSupplierContactService;
 	@Autowired
 	private ISysDepartService iSysDepartService;
+
+	 @Autowired
+	 private PurchaseOrderMainMapper purchaseOrderMainMapper;
 	
 	/**
 	 * 分页列表查询
@@ -128,6 +134,14 @@ public class ContractBaseController {
 		Page<ContractBase> page = new Page<ContractBase>(pageNo, pageSize);
 		IPage<ContractBase> pageList = contractBaseService.queryPageList(page, contractBase);
 		//阶梯价子合同
+		for (ContractBase record : pageList.getRecords()) {
+			LambdaQueryWrapper<PurchaseOrderMain> qy = new LambdaQueryWrapper<>();
+			qy.eq(PurchaseOrderMain::getContactId, record.getId());
+			PurchaseOrderMain purchaseOrderMain = purchaseOrderMainMapper.selectOne(qy);
+			if (purchaseOrderMain != null) {
+				record.setSapPo(purchaseOrderMain.getSapPo());
+			}
+		}
 		return Result.OK(pageList);
 	}
 	

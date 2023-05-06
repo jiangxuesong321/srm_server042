@@ -330,4 +330,7 @@ public class ContractBase implements Serializable {
     @TableField(exist = false)
     private String address;
 
+    @TableField(exist = false)
+    private String sapPo;
+
 }
