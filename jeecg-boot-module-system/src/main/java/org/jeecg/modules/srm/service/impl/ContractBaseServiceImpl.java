@@ -101,7 +101,6 @@ public class ContractBaseServiceImpl extends ServiceImpl<ContractBaseMapper, Con
 	@Autowired
 	private PurchaseOrderMainMapper purchaseOrderMainMapper;
 
-
 	@Value("${jeecg.path.upload}")
 	private String upLoadPath;
 
@@ -206,10 +205,10 @@ public class ContractBaseServiceImpl extends ServiceImpl<ContractBaseMapper, Con
 		updateWrapper1.eq("contract_id",contractBase.getId());
 		iContractTermsService.update(updateWrapper1);
 
-//		UpdateWrapper<ContractObjectQty> updateWrapper3 = new UpdateWrapper<>();
-//		updateWrapper3.set("del_flag","1");
-//		updateWrapper3.eq("contract_id",contractBase.getId());
-//		iContractObjectQtyService.update(updateWrapper3);
+		UpdateWrapper<ContractObjectQty> updateWrapper3 = new UpdateWrapper<>();
+		updateWrapper3.set("del_flag","1");
+		updateWrapper3.eq("contract_id",contractBase.getId());
+		iContractObjectQtyService.update(updateWrapper3);
 
 		if(contractPayStepList!=null && contractPayStepList.size()>0) {
 			for(ContractPayStep entity:contractPayStepList) {
@@ -241,6 +240,7 @@ public class ContractBaseServiceImpl extends ServiceImpl<ContractBaseMapper, Con
 		String toRecordId = null;
 		List<ContractObjectChild> childList = new ArrayList<>();
 		if(contractObjectList!=null && contractObjectList.size()>0) {
+			List<ContractObjectQty> qtyList = new ArrayList<>();
 			for(ContractObject entity:contractObjectList) {
 				//外键设置
 				String recordId = entity.getId();
@@ -296,6 +296,11 @@ public class ContractBaseServiceImpl extends ServiceImpl<ContractBaseMapper, Con
 //				BigDecimal priceTaxLocal = amountTaxLocal.divide(entity.getQty(),4,BigDecimal.ROUND_HALF_UP);
 //				entity.setContractPriceTaxLocal(priceTaxLocal);
 
+				ContractObjectQty qty = new ContractObjectQty();
+				BeanUtils.copyProperties(entity,qty);
+				qty.setRecordId(recordId);
+				qtyList.add(qty);
+
 				if(entity.getObjList() != null && entity.getObjList().size() > 0){
 					for(ContractObjectChild coc : entity.getObjList()){
 						coc.setId(String.valueOf(IdWorker.getId()));
@@ -348,7 +353,7 @@ public class ContractBaseServiceImpl extends ServiceImpl<ContractBaseMapper, Con
 				iContractObjectChildService.saveBatch(childList);
 			}
 			iContractObjectService.saveOrUpdateBatch(contractObjectList);
-//			iContractObjectQtyService.saveBatch(qtyList);
+			iContractObjectQtyService.saveBatch(qtyList);
 
 
 		}
