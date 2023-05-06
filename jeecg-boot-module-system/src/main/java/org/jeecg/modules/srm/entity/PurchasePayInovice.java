@@ -156,4 +156,6 @@ public class PurchasePayInovice implements Serializable {
     private String auth;
     @TableField(exist = false)
     private String auther;
+
+    private String invoiceName;
 }
