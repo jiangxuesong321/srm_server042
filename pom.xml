@@ -29,7 +29,7 @@
 		<knife4j-spring-boot-starter.version>3.0.3</knife4j-spring-boot-starter.version>
 		<knife4j-spring-ui.version>2.0.9</knife4j-spring-ui.version>
 		<!-- 数据库驱动 -->
-		<postgresql.version>42.2.6</postgresql.version>
+<!--		<postgresql.version>42.2.6</postgresql.version>-->
 		<ojdbc6.version>11.2.0.3</ojdbc6.version>
 		<sqljdbc4.version>4.0</sqljdbc4.version>
 		<mysql-connector-java.version>8.0.27</mysql-connector-java.version>
@@ -221,29 +221,29 @@
 			</dependency>
 
 			<!-- 七牛云SDK -->
-			<dependency>
-				<groupId>com.qiniu</groupId>
-				<artifactId>qiniu-java-sdk</artifactId>
-				<version>${qiniu-java-sdk.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>okhttp</artifactId>
-						<groupId>com.squareup.okhttp3</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>com.qiniu</groupId>-->
+<!--				<artifactId>qiniu-java-sdk</artifactId>-->
+<!--				<version>${qiniu-java-sdk.version}</version>-->
+<!--				<exclusions>-->
+<!--					<exclusion>-->
+<!--						<artifactId>okhttp</artifactId>-->
+<!--						<groupId>com.squareup.okhttp3</groupId>-->
+<!--					</exclusion>-->
+<!--				</exclusions>-->
+<!--			</dependency>-->
 			<!-- dom4j -->
-			<dependency>
-				<groupId>dom4j</groupId>
-				<artifactId>dom4j</artifactId>
-				<version>${dom4j.version}</version>
-			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>dom4j</groupId>-->
+<!--				<artifactId>dom4j</artifactId>-->
+<!--				<version>${dom4j.version}</version>-->
+<!--			</dependency>-->
 			<!-- redisson -->
-			<dependency>
-				<groupId>org.redisson</groupId>
-				<artifactId>redisson</artifactId>
-				<version>${redisson.version}</version>
-			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>org.redisson</groupId>-->
+<!--				<artifactId>redisson</artifactId>-->
+<!--				<version>${redisson.version}</version>-->
+<!--			</dependency>-->
 
 			<!-- guava工具类 -->
 			<dependency>
@@ -489,8 +489,8 @@
 			</properties>
 			<modules>
 				<!-- 微服务模块 -->
-				<module>jeecg-boot-starter</module>
-				<module>jeecg-cloud-module</module>
+<!--				<module>jeecg-boot-starter</module>-->
+<!--				<module>jeecg-cloud-module</module>-->
 			</modules>
 		</profile>
     </profiles>
