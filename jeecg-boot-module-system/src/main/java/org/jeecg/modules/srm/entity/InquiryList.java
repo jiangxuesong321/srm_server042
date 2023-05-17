@@ -15,6 +15,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Description: 询价单主表
@@ -203,8 +204,9 @@ public class InquiryList implements Serializable {
     /**供应商**/
     @TableField(exist = false)
     private String suppName;
-    /**费用分类**/
-    @TableField(exist = false)
+    /**费用类型**/
+    @Excel(name = "费用类型", width = 15)
+    @ApiModelProperty(value = "费用类型")
     private String categoryId;
     /**甲方信息**/
     @TableField(exist = false)
@@ -264,6 +266,13 @@ public class InquiryList implements Serializable {
     private String isMsg;
     @TableField(exist = false)
     private String purOtherAttachment;
+
+    @TableField(exist = false)
+    private List<InquiryRecord>  inquiryRecordList;
+
+    @TableField(exist = false)
+    private String reqCode;
+
 }
 
 

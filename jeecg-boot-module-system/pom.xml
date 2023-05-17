@@ -8,7 +8,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jeecg-boot-module-system</artifactId>
+	<artifactId>jeecg-boot-system-server</artifactId>
 
 	<repositories>
 		<repository>

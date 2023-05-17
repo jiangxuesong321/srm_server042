@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -255,8 +257,9 @@ public class BiddingMain implements Serializable {
     private String contractFirstBankAccount;
     @TableField(exist = false)
     private String contractFirstPostCode;
-    /**费用分类**/
-    @TableField(exist = false)
+    /**费用类型**/
+    @Excel(name = "费用类型", width = 15)
+    @ApiModelProperty(value = "费用类型")
     private String categoryId;
     /**页面来源**/
     @TableField(exist = false)
@@ -300,4 +303,10 @@ public class BiddingMain implements Serializable {
     private String biddingEvaluateType;
     @TableField(exist = false)
     private String purOtherAttachment;
+
+    @TableField(exist = false)
+    private List<BiddingSupplier> suppList;
+
+    @TableField(exist = false)
+    private String reqCode;
 }
