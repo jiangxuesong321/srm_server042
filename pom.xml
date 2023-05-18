@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jeecgframework.boot</groupId>
-  <artifactId>jeecg-boot-parent</artifactId>
+  <groupId>org.framework.boot</groupId>
+  <artifactId>boot-parent</artifactId>
   <version>3.2.0</version>
   <packaging>pom</packaging>
   <name>JEECG BOOT ${project.version}</name>
@@ -62,7 +62,7 @@
 	</properties>
 
 	<modules>
-        <module>jeecg-boot-base</module>
+        <module>boot-base</module>
 <!--        <module>jeecg-boot-module-demo</module>-->
         <module>jeecg-boot-module-system</module>
 	</modules>
@@ -151,25 +151,25 @@
 			<!-- jeecg tools -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
-				<artifactId>jeecg-boot-base-tools</artifactId>
+				<artifactId>boot-base-tools</artifactId>
 				<version>${jeecgboot.version}</version>
 			</dependency>
 			<!-- jeecg core -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
-				<artifactId>jeecg-boot-base-core</artifactId>
+				<artifactId>boot-base-core</artifactId>
 				<version>${jeecgboot.version}</version>
 			</dependency>
 			<!-- system 单体 api -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
-				<artifactId>jeecg-system-local-api</artifactId>
+				<artifactId>system-local-api</artifactId>
 				<version>${jeecgboot.version}</version>
 			</dependency>
 			<!-- system 微服务 api -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
-				<artifactId>jeecg-system-cloud-api</artifactId>
+				<artifactId>system-cloud-api</artifactId>
 				<version>${jeecgboot.version}</version>
 			</dependency>
 
@@ -203,17 +203,17 @@
 <!--				<artifactId>jeecg-boot-starter-shardingsphere</artifactId>-->
 <!--				<version>${jeecgboot.version}</version>-->
 <!--			</dependency>-->
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-core</artifactId>
-				<version>5.6.7.Final</version>
-				<exclusions>
-					<exclusion>
-						<groupId>commons-collections</groupId>
-						<artifactId>commons-collections</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
+<!--			<dependency>-->
+<!--				<groupId>org.hibernate</groupId>-->
+<!--				<artifactId>hibernate-core</artifactId>-->
+<!--				<version>5.6.7.Final</version>-->
+<!--				<exclusions>-->
+<!--					<exclusion>-->
+<!--						<groupId>commons-collections</groupId>-->
+<!--						<artifactId>commons-collections</artifactId>-->
+<!--					</exclusion>-->
+<!--				</exclusions>-->
+<!--			</dependency>-->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
 				<artifactId>hibernate-re</artifactId>

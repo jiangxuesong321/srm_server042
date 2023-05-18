@@ -3,19 +3,24 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>jeecg-boot-base-api</artifactId>
+        <artifactId>boot-base</artifactId>
         <groupId>org.jeecgframework.boot</groupId>
         <version>3.2.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>jeecg-system-cloud-api</artifactId>
+    <artifactId>boot-base-api</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>system-local-api</module>
+        <module>system-cloud-api</module>
+    </modules>
 
     <dependencies>
-        <!-- feign -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <groupId>org.jeecgframework.boot</groupId>
+            <artifactId>boot-base-core</artifactId>
         </dependency>
     </dependencies>
 </project>

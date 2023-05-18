@@ -2,13 +2,13 @@
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
-		<groupId>org.jeecgframework.boot</groupId>
-		<artifactId>jeecg-boot-parent</artifactId>
+		<groupId>org.framework.boot</groupId>
+		<artifactId>boot-parent</artifactId>
 		<version>3.2.0</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jeecg-boot-system-server</artifactId>
+	<artifactId>boot-system-server</artifactId>
 
 	<repositories>
 		<repository>
@@ -39,7 +39,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jeecgframework.boot</groupId>
-			<artifactId>jeecg-system-local-api</artifactId>
+			<artifactId>system-local-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
