@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.ContractBaseMapper">
-    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.ContractBase">
+<mapper namespace="org.cmoc.modules.srm.mapper.ContractBaseMapper">
+    <select id="queryPageList" resultType="org.cmoc.modules.srm.entity.ContractBase">
         SELECT
             distinct
             cb.id,
@@ -242,7 +242,7 @@
     </select>
 
 
-    <select id="fetchContractByProjId" resultType="org.jeecg.modules.srm.entity.ContractBase">
+    <select id="fetchContractByProjId" resultType="org.cmoc.modules.srm.entity.ContractBase">
         select
             <if test="query.unit == 'wy'">
                 round(sum(tmp.contract_amount_tax_local) / 10000,2) as contract_amount_tax_local
@@ -289,7 +289,7 @@
 
     </select>
 
-    <select id="fetchContractListByProjId" resultType="org.jeecg.modules.srm.entity.ContractBase">
+    <select id="fetchContractListByProjId" resultType="org.cmoc.modules.srm.entity.ContractBase">
         SELECT
             cb.id,
             cb.contract_number,
@@ -412,7 +412,7 @@
         </if>
     </select>
 
-    <select id="fetchContractBySupp" resultType="org.jeecg.modules.srm.entity.ContractBase">
+    <select id="fetchContractBySupp" resultType="org.cmoc.modules.srm.entity.ContractBase">
         SELECT
             cb.*,
             ifnull(ppa.pay_amount,0) as pay_amount,
@@ -440,7 +440,7 @@
           and contract_second_party_id = #{query.contractSecondPartyId}
     </select>
 
-    <select id="fetchContractProgressPageList" resultType="org.jeecg.modules.srm.vo.ContractProgress">
+    <select id="fetchContractProgressPageList" resultType="org.cmoc.modules.srm.vo.ContractProgress">
         SELECT
             pb.proj_name,
             co.capacity,
@@ -555,7 +555,7 @@
         </if>
     </select>
 
-    <select id="fetchContractAmount" resultType="org.jeecg.modules.srm.entity.ContractObject">
+    <select id="fetchContractAmount" resultType="org.cmoc.modules.srm.entity.ContractObject">
         SELECT
             sum(ifnull(vca.contract_amount_tax_local,cb.contract_amount_tax_local))  as contract_amount_tax,
             count(distinct cb.id) as contract_num
@@ -582,7 +582,7 @@
         </if>
     </select>
 
-    <select id="fetchPayInvoiceAmount" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+    <select id="fetchPayInvoiceAmount" resultType="org.cmoc.modules.srm.entity.PurchasePayInovice">
         select
            sum(invoice_amount_tax_local) as invoice_amount_tax
         from purchase_pay_inovice ppi
@@ -611,7 +611,7 @@
         </if>
     </select>
 
-    <select id="fetchPayNormalInvoiceAmount" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+    <select id="fetchPayNormalInvoiceAmount" resultType="org.cmoc.modules.srm.entity.PurchasePayInovice">
         select
             sum(invoice_amount_tax_local) as invoice_amount_tax
         from purchase_pay_inovice
@@ -622,7 +622,7 @@
         </if>
     </select>
 
-    <select id="fetchPaySpecialInvoiceAmount" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+    <select id="fetchPaySpecialInvoiceAmount" resultType="org.cmoc.modules.srm.entity.PurchasePayInovice">
         select
             sum(invoice_amount_tax_local) as invoice_amount_tax
         from purchase_pay_inovice
@@ -633,7 +633,7 @@
         </if>
     </select>
 
-    <select id="fetchContractToInvoice" resultType="org.jeecg.modules.srm.vo.ContractToInvoice">
+    <select id="fetchContractToInvoice" resultType="org.cmoc.modules.srm.vo.ContractToInvoice">
         SELECT
             sum(ifnull( vca.contract_amount_tax, cb.contract_amount_tax )) AS contract_amount_tax,
             cb.contract_name,
@@ -714,7 +714,7 @@
         </if>
     </select>
 
-    <select id="fetchContractToInvoiceByMonth" resultType="org.jeecg.modules.srm.vo.ContractToInvoice">
+    <select id="fetchContractToInvoiceByMonth" resultType="org.cmoc.modules.srm.vo.ContractToInvoice">
         SELECT
             DATE_FORMAT(ppi.invoice_date, '%Y-%m') as `month`,
             sum(ppi.invoice_amount_tax_local) as invoice_amount_tax,
@@ -731,7 +731,7 @@
         order by DATE_FORMAT(ppi.invoice_date, '%Y-%m')
     </select>
 
-    <select id="fetchHasPayInvoiceAmount" resultType="org.jeecg.modules.srm.entity.PurchasePayInovice">
+    <select id="fetchHasPayInvoiceAmount" resultType="org.cmoc.modules.srm.entity.PurchasePayInovice">
         SELECT
             sum( CASE WHEN ppi.is_export = '1' THEN ppi.invoice_amount_tax_local ELSE ifnull( pti.invoice_amount_tax_local,0 ) END) invoice_amount_tax
         FROM
@@ -759,7 +759,7 @@
         </if>
     </select>
 
-    <select id="fetchContractSignAmount" resultType="org.jeecg.modules.srm.entity.ContractObject">
+    <select id="fetchContractSignAmount" resultType="org.cmoc.modules.srm.entity.ContractObject">
         SELECT
         sum(cb.contract_amount_tax_local)  as contract_amount_tax
         FROM
@@ -780,7 +780,7 @@
         </if>
     </select>
 
-    <select id="fetchPayAmount" resultType="org.jeecg.modules.srm.entity.PurPayPlan">
+    <select id="fetchPayAmount" resultType="org.cmoc.modules.srm.entity.PurPayPlan">
         SELECT
         sum(ppa.pay_amount) as pay_amount_cope
         FROM
@@ -806,7 +806,7 @@
         </if>
     </select>
 
-    <select id="fetchContractAndPayPageList" resultType="org.jeecg.modules.srm.vo.ContractAndPay">
+    <select id="fetchContractAndPayPageList" resultType="org.cmoc.modules.srm.vo.ContractAndPay">
         SELECT
             co.contract_id,
             co.prod_code,
@@ -898,7 +898,7 @@
         </if>
     </select>
 
-    <select id="fetchPayAmountList" resultType="org.jeecg.modules.srm.vo.ContractAndPay">
+    <select id="fetchPayAmountList" resultType="org.cmoc.modules.srm.vo.ContractAndPay">
         SELECT
             sum(round(coq.contract_amount_tax * ppa.pay_rate / 100,2)) AS pay_amount,
             ppad.id,
@@ -934,7 +934,7 @@
     </select>
 
 
-    <select id="exportContractProgressPageList" resultType="org.jeecg.modules.srm.vo.ContractProgress">
+    <select id="exportContractProgressPageList" resultType="org.cmoc.modules.srm.vo.ContractProgress">
         SELECT
         pb.proj_name,
         co.capacity,
@@ -1048,7 +1048,7 @@
         </if>
     </select>
 
-    <select id="exportContractToInvoice" resultType="org.jeecg.modules.srm.vo.ContractToInvoice">
+    <select id="exportContractToInvoice" resultType="org.cmoc.modules.srm.vo.ContractToInvoice">
         SELECT
         sum(
         ifnull( vca.contract_amount_tax, cb.contract_amount_tax )) AS contract_amount_tax,
@@ -1129,7 +1129,7 @@
         </if>
     </select>
 
-    <select id="exportContractAndPayPageList" resultType="org.jeecg.modules.srm.vo.ContractAndPay">
+    <select id="exportContractAndPayPageList" resultType="org.cmoc.modules.srm.vo.ContractAndPay">
         SELECT
         co.contract_id,
         co.prod_code,
@@ -1221,7 +1221,7 @@
         </if>
     </select>
 
-    <select id="queryExportList" resultType="org.jeecg.modules.srm.entity.ContractBase">
+    <select id="queryExportList" resultType="org.cmoc.modules.srm.entity.ContractBase">
         SELECT
         distinct
         cb.id,
@@ -1556,7 +1556,7 @@
         </if>
     </select>
 
-    <select id="fetchContractNumByMonth" resultType="org.jeecg.modules.srm.entity.ContractBase">
+    <select id="fetchContractNumByMonth" resultType="org.cmoc.modules.srm.entity.ContractBase">
         select count(1) as qty,DATE_FORMAT(contract_valid_date, "%Y-%m") as start_month from  contract_base cb
         where  cb.contract_status = '4'
         and cb.del_flag = '0'
@@ -1817,7 +1817,7 @@
 
     </select>
 
-    <select id="fetchChildList" resultType="org.jeecg.modules.srm.entity.ContractObject">
+    <select id="fetchChildList" resultType="org.cmoc.modules.srm.entity.ContractObject">
         SELECT
             co.id,
             co.prod_name,
@@ -1866,7 +1866,7 @@
             and co.main_detail_id is null
     </select>
 
-    <select id="fetchChildQtyList" resultType="org.jeecg.modules.srm.entity.ContractObject">
+    <select id="fetchChildQtyList" resultType="org.cmoc.modules.srm.entity.ContractObject">
         select
             ifnull(coq1.id,coq.id) as id,
             ifnull(coq1.prod_spec_type,ifnull(coq.prod_spec_type,co.prod_spec_type)) as prod_spec_type,

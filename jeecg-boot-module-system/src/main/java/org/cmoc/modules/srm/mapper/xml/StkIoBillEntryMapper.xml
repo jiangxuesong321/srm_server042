@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.StkIoBillEntryMapper">
+<mapper namespace="org.cmoc.modules.srm.mapper.StkIoBillEntryMapper">
 
 	<delete id="deleteByMainId" parameterType="java.lang.String">
 		DELETE 
@@ -8,7 +8,7 @@
 		WHERE
 			 mid = #{mainId} 	</delete>
 	
-	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.StkIoBillEntry">
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.cmoc.modules.srm.entity.StkIoBillEntry">
 		SELECT
 			sibe.id,
 			co.contract_id,
@@ -66,7 +66,7 @@
 		and sibe.del_flag = '0'
 	</select>
 
-	<select id="queryDetailListByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.StkIoBillEntry">
+	<select id="queryDetailListByMainId" parameterType="java.lang.String" resultType="org.cmoc.modules.srm.entity.StkIoBillEntry">
 		SELECT
 			co.*,
 			sibe.order_detail_id,

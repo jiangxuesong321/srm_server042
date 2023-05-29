@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.ProjectBomRelationMapper">
-    <select id="fetchEqpPageList" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+<mapper namespace="org.cmoc.modules.srm.mapper.ProjectBomRelationMapper">
+    <select id="fetchEqpPageList" resultType="org.cmoc.modules.srm.entity.ProjectBomRelation">
         SELECT
             pbm.qty,
             pbm.budget_price,
@@ -79,7 +79,7 @@
         </if>
     </select>
 
-    <select id="fetchEqpPageListByProjId" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+    <select id="fetchEqpPageListByProjId" resultType="org.cmoc.modules.srm.entity.ProjectBomRelation">
         SELECT
         pbm.qty,
         pbm.qty - ifnull(tp.qty,0) as max_qty,
@@ -147,7 +147,7 @@
         </if>
     </select>
 
-    <select id="fetchTotalEqp" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+    <select id="fetchTotalEqp" resultType="org.cmoc.modules.srm.entity.ProjectBomRelation">
         SELECT
             pb.buy_amount as budget_amount,
             pb.buy_amount - ifnull(tp.order_total_amount_tax,0) as remain_amount
@@ -169,7 +169,7 @@
             pb.id = #{query.projId}
     </select>
 
-    <select id="fetchBomList" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+    <select id="fetchBomList" resultType="org.cmoc.modules.srm.entity.ProjectBomRelation">
         SELECT
             pbm.*,
             bm.`name`,
@@ -187,7 +187,7 @@
         </foreach>
     </select>
 
-    <select id="fetchEqpList" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+    <select id="fetchEqpList" resultType="org.cmoc.modules.srm.entity.ProjectBomRelation">
         select
            pbm.*,
            bm.code,

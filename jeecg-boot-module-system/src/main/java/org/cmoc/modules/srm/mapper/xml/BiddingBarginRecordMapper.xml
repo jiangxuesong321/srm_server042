@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.BiddingBarginRecordMapper">
-    <select id="fetchHistoryPrice" resultType="org.jeecg.modules.srm.entity.BiddingBarginRecord">
+<mapper namespace="org.cmoc.modules.srm.mapper.BiddingBarginRecordMapper">
+    <select id="fetchHistoryPrice" resultType="org.cmoc.modules.srm.entity.BiddingBarginRecord">
         select
                bbr.bg_price_tax,
                bbr.supp_bg_price_tax,
@@ -17,7 +17,7 @@
         and bbr.bg_price_tax is not null
     </select>
 
-    <select id="fetchPriceHistory" resultType="org.jeecg.modules.srm.entity.BiddingBarginRecord">
+    <select id="fetchPriceHistory" resultType="org.cmoc.modules.srm.entity.BiddingBarginRecord">
         select
             bbr.bg_price_tax,
             bbr.supp_bg_price_tax,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.StkIoBillMapper">
-    <select id="fetchArrivalQty" resultType="org.jeecg.modules.srm.entity.StkIoBillEntry">
+<mapper namespace="org.cmoc.modules.srm.mapper.StkIoBillMapper">
+    <select id="fetchArrivalQty" resultType="org.cmoc.modules.srm.entity.StkIoBillEntry">
         SELECT
             ROUND((ifnull(stk.qty,0) / ifnull(pbr.qty,0)) * 100,2) as qty
         FROM
@@ -41,7 +41,7 @@
             ON pbr.id = stk.id
     </select>
 
-    <select id="queryDetailPageList" resultType="org.jeecg.modules.srm.entity.StkIoBillEntry">
+    <select id="queryDetailPageList" resultType="org.cmoc.modules.srm.entity.StkIoBillEntry">
         SELECT
             sibe.qty as stock_qty,
             cb.contract_first_party as name,
@@ -63,7 +63,7 @@
         order by co.sort+0
     </select>
 
-    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.StkIoBill">
+    <select id="queryPageList" resultType="org.cmoc.modules.srm.entity.StkIoBill">
         SELECT
             distinct
             sib.*,
@@ -173,7 +173,7 @@
         </if>
     </select>
 
-    <select id="queryOtherDetailsById" resultType="org.jeecg.modules.srm.entity.ContractObjectQty">
+    <select id="queryOtherDetailsById" resultType="org.cmoc.modules.srm.entity.ContractObjectQty">
         <![CDATA[
         select
             group_concat(t.prod_name separator ';') prodName,
@@ -200,7 +200,7 @@
     </select>
 
 
-    <select id="exportXls" resultType="org.jeecg.modules.srm.entity.StkIoBill">
+    <select id="exportXls" resultType="org.cmoc.modules.srm.entity.StkIoBill">
         SELECT
         distinct
         sib.*,
@@ -303,7 +303,7 @@
         </if>
     </select>
 
-    <select id="queryOtherDetailsByIds" resultType="org.jeecg.modules.srm.entity.ContractObjectQty">
+    <select id="queryOtherDetailsByIds" resultType="org.cmoc.modules.srm.entity.ContractObjectQty">
             select
                group_concat(t.prod_name separator ';') prodName,
                group_concat(t.sort separator ';') sort,
@@ -332,7 +332,7 @@
     </select>
 
 
-    <select id="fetchDetailPageList" resultType="org.jeecg.modules.srm.entity.StkIoBillEntry">
+    <select id="fetchDetailPageList" resultType="org.cmoc.modules.srm.entity.StkIoBillEntry">
         SELECT
             sibe.id,
             sibe.qty,

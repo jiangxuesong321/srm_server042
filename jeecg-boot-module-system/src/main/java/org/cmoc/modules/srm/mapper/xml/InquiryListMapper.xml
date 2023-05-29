@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.InquiryListMapper">
-    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.InquiryList">
+<mapper namespace="org.cmoc.modules.srm.mapper.InquiryListMapper">
+    <select id="queryPageList" resultType="org.cmoc.modules.srm.entity.InquiryList">
         SELECT
             il.id,
             il.inquiry_code,
@@ -100,7 +100,7 @@
             </if>
     </select>
 
-    <select id="queryPageToDetailList" resultType="org.jeecg.modules.srm.entity.InquiryList">
+    <select id="queryPageToDetailList" resultType="org.cmoc.modules.srm.entity.InquiryList">
         SELECT
             il.inquiry_code,
             il.quotation_deadline,
@@ -233,7 +233,7 @@
             </if>
     </select>
 
-    <select id="fetchSuppList" resultType="org.jeecg.modules.srm.entity.BasSupplier">
+    <select id="fetchSuppList" resultType="org.cmoc.modules.srm.entity.BasSupplier">
         SELECT DISTINCT
             bs.id,
             bs.NAME

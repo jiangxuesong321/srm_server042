@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.PurchaseRequestMainMapper">
-    <select id="fetchChildList" resultType="org.jeecg.modules.srm.entity.PurchaseRequestMain">
+<mapper namespace="org.cmoc.modules.srm.mapper.PurchaseRequestMainMapper">
+    <select id="fetchChildList" resultType="org.cmoc.modules.srm.entity.PurchaseRequestMain">
         SELECT
             prm.req_code,
             prm.req_title,
@@ -36,7 +36,7 @@
             </if>
     </select>
 
-    <select id="fetchRequestByProjId" resultType="org.jeecg.modules.srm.entity.PurchaseRequestMain">
+    <select id="fetchRequestByProjId" resultType="org.cmoc.modules.srm.entity.PurchaseRequestMain">
         SELECT
             sum(prm.order_total_amount_tax) as order_total_amount_tax,
             prm.project_id
@@ -49,7 +49,7 @@
         group by prm.project_id
     </select>
 
-    <select id="pageList" resultType="org.jeecg.modules.srm.entity.PurchaseRequestMain">
+    <select id="pageList" resultType="org.cmoc.modules.srm.entity.PurchaseRequestMain">
         SELECT
             prm.*,
             case
@@ -137,7 +137,7 @@
         </if>
     </select>
 
-    <select id="fetchMaxAmount" resultType="org.jeecg.modules.srm.entity.PurchaseRequestMain">
+    <select id="fetchMaxAmount" resultType="org.cmoc.modules.srm.entity.PurchaseRequestMain">
         SELECT
             sum(order_total_amount_tax) as order_total_amount_tax
         FROM
@@ -152,7 +152,7 @@
             category_id
     </select>
 
-    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.PurchaseRequestMain">
+    <select id="queryPageList" resultType="org.cmoc.modules.srm.entity.PurchaseRequestMain">
         select
             distinct
             prm.*,
@@ -242,7 +242,7 @@
 
         </if>
     </select>
-    <select id="queryPageGoodsList" resultType="org.jeecg.modules.srm.entity.PurchaseRequestMain">
+    <select id="queryPageGoodsList" resultType="org.cmoc.modules.srm.entity.PurchaseRequestMain">
         select
         distinct
         prm.*
@@ -314,7 +314,7 @@
         </if>
     </select>
 
-    <select id="queryPageList1" resultType="org.jeecg.modules.srm.entity.PurchaseRequestMain">
+    <select id="queryPageList1" resultType="org.cmoc.modules.srm.entity.PurchaseRequestMain">
         select
         distinct
         prm.*,

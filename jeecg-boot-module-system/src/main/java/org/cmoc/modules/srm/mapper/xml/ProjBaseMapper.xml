@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.ProjBaseMapper">
-    <select id="fetchProjById" resultType="org.jeecg.modules.srm.entity.ProjBase">
+<mapper namespace="org.cmoc.modules.srm.mapper.ProjBaseMapper">
+    <select id="fetchProjById" resultType="org.cmoc.modules.srm.entity.ProjBase">
         
     </select>
 
-    <select id="pageList" resultType="org.jeecg.modules.srm.entity.ProjBase">
+    <select id="pageList" resultType="org.cmoc.modules.srm.entity.ProjBase">
         SELECT
             distinct
             pb.id,
@@ -192,7 +192,7 @@
         </if>
     </select>
 
-    <select id="fetchCapacityByProjId" resultType="org.jeecg.modules.srm.entity.ProjBase">
+    <select id="fetchCapacityByProjId" resultType="org.cmoc.modules.srm.entity.ProjBase">
         select
            a.proj_id as id,
            round(ifnull(b.capacity,0) / ifnull(a.capacity,0),2) as capacity
@@ -291,7 +291,7 @@
          group by pc.id
     </select>
 
-    <select id="fetchProjectAmount" resultType="org.jeecg.modules.srm.entity.ProjBase">
+    <select id="fetchProjectAmount" resultType="org.cmoc.modules.srm.entity.ProjBase">
         SELECT
 
             <if test="query.unit == 'wy'">
@@ -423,7 +423,7 @@
         </if>
     </select>
 
-    <select id="fetchCapacity" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+    <select id="fetchCapacity" resultType="org.cmoc.modules.srm.entity.ProjectBomRelation">
         select
             a.model,
             round((ifnull(b.capacity,0) / ifnull(a.capacity,0)) * 100,2) as capacity
@@ -458,7 +458,7 @@
         ) b on a.model = b.model
     </select>
 
-    <select id="fetchProjBudgetPageList" resultType="org.jeecg.modules.srm.vo.ProjBudget">
+    <select id="fetchProjBudgetPageList" resultType="org.cmoc.modules.srm.vo.ProjBudget">
         select
             tmp.*
         from (
@@ -545,7 +545,7 @@
         </if>
     </select>
 
-    <select id="exportProjBudgetPageList" resultType="org.jeecg.modules.srm.vo.ProjBudget">
+    <select id="exportProjBudgetPageList" resultType="org.cmoc.modules.srm.vo.ProjBudget">
         select
         tmp.*
         from (
@@ -624,7 +624,7 @@
         </if>
     </select>
 
-    <select id="fetchTotalProjBudgetPageList" resultType="org.jeecg.modules.srm.vo.ProjBudget">
+    <select id="fetchTotalProjBudgetPageList" resultType="org.cmoc.modules.srm.vo.ProjBudget">
 
         SELECT
             ifnull(sum(pbr.qty * pbr.budget_price),0) as executeAmount,
@@ -711,7 +711,7 @@
         group by pb.subject
     </select>
 
-    <select id="exportProdList" resultType="org.jeecg.modules.srm.vo.BasMaterialImport">
+    <select id="exportProdList" resultType="org.cmoc.modules.srm.vo.BasMaterialImport">
         SELECT
             bm.`code`,
             bm.`name`,
@@ -727,7 +727,7 @@
           and pbr.category_id = #{query.id}
     </select>
 
-    <select id="exportXlsByList" resultType="org.jeecg.modules.srm.entity.ProjBase">
+    <select id="exportXlsByList" resultType="org.cmoc.modules.srm.entity.ProjBase">
         SELECT
             distinct
             pb.id,
@@ -935,7 +935,7 @@
         group by pb.subject
     </select>
 
-    <select id="fetchModelBySubject" resultType="org.jeecg.modules.srm.entity.ProjectBomChild">
+    <select id="fetchModelBySubject" resultType="org.cmoc.modules.srm.entity.ProjectBomChild">
         SELECT
             sum( pbc.capacity ) AS capacity,
             sum( pbc.act_capacity ) AS act_capacity,

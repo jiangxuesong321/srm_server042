@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.StkReturnBillMapper">
-    <select id="queryDetailListByMainId" resultType="org.jeecg.modules.srm.entity.StkIoBillEntry">
+<mapper namespace="org.cmoc.modules.srm.mapper.StkReturnBillMapper">
+    <select id="queryDetailListByMainId" resultType="org.cmoc.modules.srm.entity.StkIoBillEntry">
         SELECT
             co.*,
             srbe.bill_detail_id,
@@ -14,7 +14,7 @@
           and srbe.del_flag = '0'
     </select>
 
-    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.StkReturnBill">
+    <select id="queryPageList" resultType="org.cmoc.modules.srm.entity.StkReturnBill">
         select
                *
         from

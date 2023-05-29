@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.PurchaseRequestDetailMapper">
+<mapper namespace="org.cmoc.modules.srm.mapper.PurchaseRequestDetailMapper">
 
 	<delete id="deleteByMainId" parameterType="java.lang.String">
 		DELETE 
@@ -8,7 +8,7 @@
 		WHERE
 			 req_id = #{mainId} 	</delete>
 	
-	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.PurchaseRequestDetail">
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.cmoc.modules.srm.entity.PurchaseRequestDetail">
 		SELECT
 			DISTINCT
 			prd.id,
@@ -61,7 +61,7 @@
 		  and prd.del_flag = '0'
 	 </select>
 
-	<select id="fetchAmountByModel" resultType="org.jeecg.modules.srm.entity.PurchaseRequestDetail">
+	<select id="fetchAmountByModel" resultType="org.cmoc.modules.srm.entity.PurchaseRequestDetail">
 		SELECT
 			sum(budget_amount) as order_amount_tax,
 			pbr.proj_id,
@@ -74,7 +74,7 @@
 		group by pbr.proj_id,pbr.model
 	</select>
 
-	<select id="fetchAmountByCategory" resultType="org.jeecg.modules.srm.entity.PurchaseRequestDetail">
+	<select id="fetchAmountByCategory" resultType="org.cmoc.modules.srm.entity.PurchaseRequestDetail">
 		SELECT
 			sum(order_amount_tax) as order_amount_tax,
 			prm.project_id,
@@ -88,7 +88,7 @@
 		group by prm.project_id,prm.category_id
 	</select>
 
-	<select id="queryPurchaseRequestDetail" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.PurchaseRequestDetail">
+	<select id="queryPurchaseRequestDetail" parameterType="java.lang.String" resultType="org.cmoc.modules.srm.entity.PurchaseRequestDetail">
 		SELECT
 			DISTINCT
 			prd.id,
@@ -123,7 +123,7 @@
           and prd.qty > prd.purc_qty
 	</select>
 
-	<select id="countInfo" resultType="org.jeecg.modules.srm.entity.PurchaseRequestDetail">
+	<select id="countInfo" resultType="org.cmoc.modules.srm.entity.PurchaseRequestDetail">
 		SELECT
 		group_concat(t.qty,'台',t.prod_name Separator '-') prodName,
 		prm.order_total_amount_tax orderAmountTax
@@ -142,7 +142,7 @@
 		GROUP BY t.req_id
 	</select>
 
-	<select id="fetchBatchRecordList" resultType="org.jeecg.modules.srm.entity.PurchaseRequestDetail">
+	<select id="fetchBatchRecordList" resultType="org.cmoc.modules.srm.entity.PurchaseRequestDetail">
 		SELECT
 			DISTINCT
 			prd.id,

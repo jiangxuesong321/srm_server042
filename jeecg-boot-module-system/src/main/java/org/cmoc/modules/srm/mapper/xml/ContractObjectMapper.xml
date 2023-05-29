@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.ContractObjectMapper">
+<mapper namespace="org.cmoc.modules.srm.mapper.ContractObjectMapper">
 
 	<delete id="deleteByMainId" parameterType="java.lang.String">
 		DELETE 
@@ -8,13 +8,13 @@
 		WHERE
 			 contract_id = #{mainId} 	</delete>
 	
-	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.ContractObject">
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.cmoc.modules.srm.entity.ContractObject">
 		SELECT * 
 		FROM  contract_object
 		WHERE
 			 contract_id = #{mainId} 	</select>
 
-	<select id="getContractDetailList" resultType="org.jeecg.modules.srm.entity.ContractObject">
+	<select id="getContractDetailList" resultType="org.cmoc.modules.srm.entity.ContractObject">
 		SELECT
 			co.*,
 		    co.contract_price as price,
@@ -36,7 +36,7 @@
 		and co.del_flag = '0'
 	</select>
 
-	<select id="fetchEqpByContract" resultType="org.jeecg.modules.srm.entity.ContractObject">
+	<select id="fetchEqpByContract" resultType="org.cmoc.modules.srm.entity.ContractObject">
 		SELECT
 			cb.id,
 			cb.contract_second_party as supp_name,
@@ -67,7 +67,7 @@
 
 	</select>
 
-	<select id="fetchEqpPriceByContract" resultType="org.jeecg.modules.srm.entity.ContractObject">
+	<select id="fetchEqpPriceByContract" resultType="org.cmoc.modules.srm.entity.ContractObject">
 		SELECT
 			cb.contract_second_party as supp_name,
 			cb.contract_number,
@@ -89,7 +89,7 @@
 		  and co.prod_code = #{query.prodCode}
 	</select>
 
-	<select id="fetchEqpSuppByContract" resultType="org.jeecg.modules.srm.entity.BasSupplier">
+	<select id="fetchEqpSuppByContract" resultType="org.cmoc.modules.srm.entity.BasSupplier">
 		SELECT
 			distinct
 			bs.name,
@@ -109,7 +109,7 @@
 		  and co.prod_code = #{query.prodCode}
 	</select>
 
-	<select id="fetchTotalByEqp" resultType="org.jeecg.modules.srm.entity.ContractObject">
+	<select id="fetchTotalByEqp" resultType="org.cmoc.modules.srm.entity.ContractObject">
 		SELECT
 			co.prod_code,
 		    sum(co.qty) as qty
@@ -125,7 +125,7 @@
 		group by co.prod_code
 	</select>
 
-	<select id="fetchAmountByModel" resultType="org.jeecg.modules.srm.entity.ContractObject">
+	<select id="fetchAmountByModel" resultType="org.cmoc.modules.srm.entity.ContractObject">
 		SELECT
 			sum(ifnull(vcra.contract_amount_tax_local,co.contract_amount_tax_local) ) AS contract_amount_tax_local,
 			cb.project_id,
@@ -145,7 +145,7 @@
 			bm.model
 	</select>
 
-	<select id="fetchAmountByCategory" resultType="org.jeecg.modules.srm.entity.ContractObject">
+	<select id="fetchAmountByCategory" resultType="org.cmoc.modules.srm.entity.ContractObject">
 		select tmp.project_id,tmp.category_id,sum(tmp.contract_amount_tax_local) as contract_amount_tax_local from (
 		  SELECT
 			  sum(ifnull(vcra.contract_amount_tax_local,co.contract_amount_tax_local) ) AS contract_amount_tax_local,
@@ -177,7 +177,7 @@
 		group by tmp.project_id,tmp.category_id
 	</select>
 
-	<select id="listByDetailList" resultType="org.jeecg.modules.srm.entity.ContractObject">
+	<select id="listByDetailList" resultType="org.cmoc.modules.srm.entity.ContractObject">
 		select co.*
 		from contract_object_qty co
 		where co.del_flag = '0'
@@ -206,7 +206,7 @@
 		order by co.sort
 	</select>
 
-	<select id="fetchContractQty" resultType="org.jeecg.modules.srm.entity.ContractObject">
+	<select id="fetchContractQty" resultType="org.cmoc.modules.srm.entity.ContractObject">
 		SELECT
 			ROUND((ifnull(cb.qty,0) / ifnull(pbr.qty,0)) * 100,2) as qty
 		FROM

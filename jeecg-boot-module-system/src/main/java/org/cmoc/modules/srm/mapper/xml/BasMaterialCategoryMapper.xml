@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.BasMaterialCategoryMapper">
+<mapper namespace="org.cmoc.modules.srm.mapper.BasMaterialCategoryMapper">
 
 	<update id="updateTreeNodeStatus" parameterType="java.lang.String">
 		update bas_material_category set has_child = #{status} where id = #{id}
 	</update>
 
   	<!-- 【vue3专用】 -->
-	<select id="queryListByPid" parameterType="java.lang.Object" resultType="org.jeecg.common.system.vo.SelectTreeModel">
+	<select id="queryListByPid" parameterType="java.lang.Object" resultType="org.cmoc.common.system.vo.SelectTreeModel">
 		select
 		  id as "key",
 		  id as "value",
@@ -24,7 +24,7 @@
 		</if>
 	</select>
 
-	<select id="getCategoryList" resultType="org.jeecg.modules.srm.entity.BasMaterialCategory">
+	<select id="getCategoryList" resultType="org.cmoc.modules.srm.entity.BasMaterialCategory">
 		SELECT
 			concat_ws('-',bone.name,btwo.name,bthree.name,bfour.name) as name,
 			concat_ws(',',bone.id,btwo.id,bthree.id,bfour.id) as id,

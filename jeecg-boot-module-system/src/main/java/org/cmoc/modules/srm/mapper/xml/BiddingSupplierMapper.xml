@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.BiddingSupplierMapper">
+<mapper namespace="org.cmoc.modules.srm.mapper.BiddingSupplierMapper">
 
 	<delete id="deleteByMainId" parameterType="java.lang.String">
 		DELETE 
@@ -8,13 +8,13 @@
 		WHERE
 			 bidding_id = #{mainId} 	</delete>
 	
-	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.BiddingSupplier">
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.cmoc.modules.srm.entity.BiddingSupplier">
 		SELECT * 
 		FROM  bidding_supplier
 		WHERE
 			 bidding_id = #{mainId} 	</select>
 
-	<select id="fetchBiddingSuppList" resultType="org.jeecg.modules.srm.entity.BiddingSupplier">
+	<select id="fetchBiddingSuppList" resultType="org.cmoc.modules.srm.entity.BiddingSupplier">
 		SELECT
 			bs.is_recommend,
 			bs.id,
@@ -29,7 +29,7 @@
 		and bs.record_id = #{id}
 	</select>
 
-	<select id="fetchHasBiddingSuppList" resultType="org.jeecg.modules.srm.entity.BiddingSupplier">
+	<select id="fetchHasBiddingSuppList" resultType="org.cmoc.modules.srm.entity.BiddingSupplier">
 		SELECT
 			bs.is_recommend,
 			bs.id,
@@ -64,7 +64,7 @@
 		  </if>
 	</select>
 
-	<select id="fetchSuppList" resultType="org.jeecg.modules.srm.entity.BiddingSupplier">
+	<select id="fetchSuppList" resultType="org.cmoc.modules.srm.entity.BiddingSupplier">
 		SELECT
 			bs.id,
 			bs.supplier_id,
@@ -79,7 +79,7 @@
 		  and bs.bidding_id = #{id}
 	</select>
 
-	<select id="fetchFixBiddingList" resultType="org.jeecg.modules.srm.vo.FixBiddingPage">
+	<select id="fetchFixBiddingList" resultType="org.cmoc.modules.srm.vo.FixBiddingPage">
 		SELECT
 		    case when (bm.bidding_status = '3' or bm.bidding_status = '2' or bm.bidding_status = '8') then brs.is_recommend
 		    else brtp.is_recommend end is_recommend,

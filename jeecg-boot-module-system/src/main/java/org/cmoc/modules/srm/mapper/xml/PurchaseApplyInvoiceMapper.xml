@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.PurchaseApplyInvoiceMapper">
-    <select id="fetchDetailListByContractId" resultType="org.jeecg.modules.srm.entity.PurchaseApplyInvoice">
+<mapper namespace="org.cmoc.modules.srm.mapper.PurchaseApplyInvoiceMapper">
+    <select id="fetchDetailListByContractId" resultType="org.cmoc.modules.srm.entity.PurchaseApplyInvoice">
         SELECT
             sum(pai.invoice_amount_tax) as invoice_amount_tax
         FROM
@@ -20,7 +20,7 @@
             </foreach>
     </select>
 
-    <select id="fetchDetailListByApplyids" resultType="org.jeecg.modules.srm.entity.PurchaseApplyInvoice">
+    <select id="fetchDetailListByApplyids" resultType="org.cmoc.modules.srm.entity.PurchaseApplyInvoice">
         SELECT
             sum(pai.invoice_amount_tax) as invoice_amount_tax,
             pai.apply_id

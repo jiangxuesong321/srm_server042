@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.InquirySupplierMapper">
+<mapper namespace="org.cmoc.modules.srm.mapper.InquirySupplierMapper">
 
 	<delete id="deleteByMainId" parameterType="java.lang.String">
 		DELETE 
@@ -8,13 +8,13 @@
 		WHERE
 			 inquiry_id = #{mainId} 	</delete>
 	
-	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.InquirySupplier">
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.cmoc.modules.srm.entity.InquirySupplier">
 		SELECT * 
 		FROM  inquiry_supplier
 		WHERE
 			 inquiry_id = #{mainId} 	</select>
 
-	<select id="getSuppInfo" resultType="org.jeecg.modules.srm.entity.InquirySupplier">
+	<select id="getSuppInfo" resultType="org.cmoc.modules.srm.entity.InquirySupplier">
 		SELECT
 			bs.id,
 			bs.name,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.BasWarehouseMapper">
-    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.BasWarehouse">
+<mapper namespace="org.cmoc.modules.srm.mapper.BasWarehouseMapper">
+    <select id="queryPageList" resultType="org.cmoc.modules.srm.entity.BasWarehouse">
         SELECT
             bw.*,
             ifnull( sibe.qty, 0 ) AS qty,
@@ -80,7 +80,7 @@
 
     </select>
 
-    <select id="exportXls" resultType="org.jeecg.modules.srm.entity.BasWarehouse">
+    <select id="exportXls" resultType="org.cmoc.modules.srm.entity.BasWarehouse">
         SELECT
             bw.*,
             ifnull( sibe.qty, 0 ) AS qty,

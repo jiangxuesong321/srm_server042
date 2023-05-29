@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.ProjectBomChildMapper">
-    <select id="fetchTotalCapacity" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+<mapper namespace="org.cmoc.modules.srm.mapper.ProjectBomChildMapper">
+    <select id="fetchTotalCapacity" resultType="org.cmoc.modules.srm.entity.ProjectBomRelation">
         SELECT
             sum( pbr.qty * pbr.capacity ) AS capacity,
             pbr.proj_id,
@@ -32,7 +32,7 @@
         group by pbr.proj_id,pbr.model
     </select>
 
-    <select id="fetchDiffCapacity" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+    <select id="fetchDiffCapacity" resultType="org.cmoc.modules.srm.entity.ProjectBomRelation">
         SELECT
             sum((pbr.capacity - co.capacity) * co.qty) as capacity,
             pbr.model,
@@ -59,7 +59,7 @@
           group by cb.project_id,pbr.model
     </select>
 
-    <select id="fetchDiffCapacityTotal" resultType="org.jeecg.modules.srm.entity.ProjectBomRelation">
+    <select id="fetchDiffCapacityTotal" resultType="org.cmoc.modules.srm.entity.ProjectBomRelation">
         SELECT
             sum(ifnull(vcra.contract_amount_tax_local,co.contract_amount_tax_local)) as budget_amount
         FROM
@@ -79,7 +79,7 @@
         </if>
     </select>
 
-    <select id="fetchContractByProjId" resultType="org.jeecg.modules.srm.entity.ProjectBomChild">
+    <select id="fetchContractByProjId" resultType="org.cmoc.modules.srm.entity.ProjectBomChild">
         SELECT
             sum(co.contract_amount_tax_local)  as budget_amount
         FROM
@@ -99,7 +99,7 @@
           AND cb.project_id = #{query.projectId}
     </select>
 
-    <select id="fetchBomChildList" resultType="org.jeecg.modules.srm.entity.ProjectBomChild">
+    <select id="fetchBomChildList" resultType="org.cmoc.modules.srm.entity.ProjectBomChild">
         SELECT
             pbc.id,
             pbc.model,

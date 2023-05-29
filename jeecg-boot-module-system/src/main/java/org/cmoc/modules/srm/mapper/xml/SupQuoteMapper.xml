@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.SupQuoteMapper">
-    <select id="fetchPriceHistory" resultType="org.jeecg.modules.srm.entity.SupQuote">
+<mapper namespace="org.cmoc.modules.srm.mapper.SupQuoteMapper">
+    <select id="fetchPriceHistory" resultType="org.cmoc.modules.srm.entity.SupQuote">
         SELECT
             tp.currency,
             tp.tax_rate,
@@ -47,7 +47,7 @@
             tp.create_time DESC
     </select>
 
-    <select id="fetchPriceHistoryById" resultType="org.jeecg.modules.srm.entity.SupQuote">
+    <select id="fetchPriceHistoryById" resultType="org.cmoc.modules.srm.entity.SupQuote">
         SELECT
             tp.currency,
             tp.tax_rate,

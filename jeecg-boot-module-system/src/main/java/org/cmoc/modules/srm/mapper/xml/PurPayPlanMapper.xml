@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.PurPayPlanMapper">
-    <select id="getTotalAmountByCurrency" resultType="org.jeecg.modules.srm.entity.PurPayPlan">
+<mapper namespace="org.cmoc.modules.srm.mapper.PurPayPlanMapper">
+    <select id="getTotalAmountByCurrency" resultType="org.cmoc.modules.srm.entity.PurPayPlan">
         SELECT
             sum(pay_amount_cope) as pay_amount_cope,
             sum(pay_amount_usd) as pay_amount_usd,
@@ -56,7 +56,7 @@
         </if>
     </select>
 
-    <select id="fetchPayAmountByProjId" resultType="org.jeecg.modules.srm.entity.PurPayPlan">
+    <select id="fetchPayAmountByProjId" resultType="org.cmoc.modules.srm.entity.PurPayPlan">
         select
         <if test="query.unit == 'wy'">
            round(sum(tmp.pay_amount_cope) / 10000,2) as pay_amount_cope
@@ -137,7 +137,7 @@
 
     </select>
 
-    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.PurPayPlan">
+    <select id="queryPageList" resultType="org.cmoc.modules.srm.entity.PurPayPlan">
         select
             distinct
             ppp.*,
@@ -239,7 +239,7 @@
         </if>
     </select>
 
-    <select id="fetchPlanAmount" resultType="org.jeecg.modules.srm.entity.PurPayPlan">
+    <select id="fetchPlanAmount" resultType="org.cmoc.modules.srm.entity.PurPayPlan">
         SELECT
             sum(ppa.pay_amount) as pay_amount_cope,
             ppp.plan_month
@@ -270,7 +270,7 @@
           group by ppp.plan_month
     </select>
 
-    <select id="fetchPageList" resultType="org.jeecg.modules.srm.entity.PurPayPlan">
+    <select id="fetchPageList" resultType="org.cmoc.modules.srm.entity.PurPayPlan">
         SELECT
             ppa.pay_amount_other as pay_amount,
             ppp.plan_month,
@@ -285,7 +285,7 @@
           AND ppa.contract_id = #{query.contractId}
     </select>
 
-    <select id="fetchPayProgressPageList" resultType="org.jeecg.modules.srm.vo.PayProgress">
+    <select id="fetchPayProgressPageList" resultType="org.cmoc.modules.srm.vo.PayProgress">
         SELECT
             pb.proj_name,
             coq.prod_name,
@@ -451,7 +451,7 @@
         order by SUBSTR(pay_time,1,7)
     </select>
 
-    <select id="fetchProjAmountByMonth" resultType="org.jeecg.modules.srm.vo.AmountPlanToYear">
+    <select id="fetchProjAmountByMonth" resultType="org.cmoc.modules.srm.vo.AmountPlanToYear">
         SELECT
             ppa.project_name AS title,
             SUBSTR(ppp.pay_time,1,7) AS `month`,
@@ -476,7 +476,7 @@
         order by SUBSTR(ppp.pay_time,1,7)
     </select>
 
-    <select id="fetchPlanProjAmountByMonth" resultType="org.jeecg.modules.srm.vo.AmountPlanToYear">
+    <select id="fetchPlanProjAmountByMonth" resultType="org.cmoc.modules.srm.vo.AmountPlanToYear">
         SELECT
         ppa.project_name AS title,
         plan_month AS `month`,
@@ -500,7 +500,7 @@
         order by ppp.plan_month
     </select>
 
-    <select id="fetchGroupAmountPlanPageList" resultType="org.jeecg.modules.srm.entity.PurPayApply">
+    <select id="fetchGroupAmountPlanPageList" resultType="org.cmoc.modules.srm.entity.PurPayApply">
         SELECT
             ppad.contract_amount_tax AS pay_amount,
             ppa.currency,
@@ -542,7 +542,7 @@
         </if>
     </select>
 
-    <select id="fetchProjAmountBar" resultType="org.jeecg.modules.srm.vo.AmountPlanToYear">
+    <select id="fetchProjAmountBar" resultType="org.cmoc.modules.srm.vo.AmountPlanToYear">
         SELECT
             SUBSTR( ppp.pay_time, 1, 7 ) AS `month`,
             sum( ppa.pay_amount ) AS pay_amount
@@ -593,7 +593,7 @@
             ppa.project_id
     </select>
 
-    <select id="fetchAmountPlanPageList" resultType="org.jeecg.modules.srm.vo.AmountPlan">
+    <select id="fetchAmountPlanPageList" resultType="org.cmoc.modules.srm.vo.AmountPlan">
         SELECT
             cb.contract_first_party as subject,
             cb.contract_second_party_id as supp_id,
@@ -759,7 +759,7 @@
 
     </select>
 
-    <select id="exportPayProgressPageList" resultType="org.jeecg.modules.srm.vo.PayProgress">
+    <select id="exportPayProgressPageList" resultType="org.cmoc.modules.srm.vo.PayProgress">
         SELECT
         pb.proj_name,
         coq.prod_name,
@@ -877,7 +877,7 @@
         </if>
     </select>
 
-    <select id="exportAmountPlanPageList" resultType="org.jeecg.modules.srm.vo.AmountPlan">
+    <select id="exportAmountPlanPageList" resultType="org.cmoc.modules.srm.vo.AmountPlan">
         SELECT
         cb.contract_first_party as subject,
         cb.contract_second_party_id as supp_id,
@@ -1042,7 +1042,7 @@
         </if>
     </select>
 
-    <select id="fetchDetailList" resultType="org.jeecg.modules.srm.entity.PurPayPlanDetail">
+    <select id="fetchDetailList" resultType="org.cmoc.modules.srm.entity.PurPayPlanDetail">
         SELECT DISTINCT
             pppd.pay_apply_id,
             ppa.contract_id,
@@ -1057,7 +1057,7 @@
            and pppd.pay_plan_id = #{query.id}
     </select>
 
-    <select id="fetchPlanProjAmount" resultType="org.jeecg.modules.srm.vo.AmountPlanToYear">
+    <select id="fetchPlanProjAmount" resultType="org.cmoc.modules.srm.vo.AmountPlanToYear">
         SELECT
         plan_month AS `month`,
         sum( ppa.pay_amount ) AS pay_amount
@@ -1078,7 +1078,7 @@
         order by ppp.plan_month
     </select>
 
-    <select id="fetchPlanProjChildAmountByMonth" resultType="org.jeecg.modules.srm.vo.AmountPlanToYear">
+    <select id="fetchPlanProjChildAmountByMonth" resultType="org.cmoc.modules.srm.vo.AmountPlanToYear">
         SELECT
         bm.model AS title,
         plan_month AS `month`,
@@ -1106,7 +1106,7 @@
         order by ppp.plan_month
     </select>
 
-    <select id="fetchProjChildAmountByMonth" resultType="org.jeecg.modules.srm.vo.AmountPlanToYear">
+    <select id="fetchProjChildAmountByMonth" resultType="org.cmoc.modules.srm.vo.AmountPlanToYear">
         SELECT
         bm.model AS title,
         SUBSTR(ppp.pay_time,1,7) AS `month`,
@@ -1135,7 +1135,7 @@
         order by SUBSTR(ppp.pay_time,1,7)
     </select>
 
-    <select id="fetchAmountPlanByCurrency" resultType="org.jeecg.modules.srm.vo.AmountPlan">
+    <select id="fetchAmountPlanByCurrency" resultType="org.cmoc.modules.srm.vo.AmountPlan">
         SELECT
             sum(round(coq.contract_amount_tax  * ppa.pay_rate / 100,2)) AS pay_amount,
             sum(round(coq.contract_amount_tax_local * ppa.pay_rate / 100,2)) as pay_amount_local,
@@ -1183,7 +1183,7 @@
 
     </select>
 
-    <select id="fetchAmountPlanByPayMethod" resultType="org.jeecg.modules.srm.vo.AmountPlan">
+    <select id="fetchAmountPlanByPayMethod" resultType="org.cmoc.modules.srm.vo.AmountPlan">
         SELECT
             sum(round(coq.contract_amount_tax  * ppa.pay_rate / 100,2)) AS pay_amount,
             sum(round(coq.contract_amount_tax_local * ppa.pay_rate / 100,2)) as pay_amount_local,
@@ -1230,7 +1230,7 @@
         group by ppa.pay_method
     </select>
 
-    <select id="fetchAmountPlanByArea" resultType="org.jeecg.modules.srm.vo.AmountPlan">
+    <select id="fetchAmountPlanByArea" resultType="org.cmoc.modules.srm.vo.AmountPlan">
         SELECT
             sum( CASE WHEN ppa.pay_type = '00' THEN round( coq.contract_amount_tax_local * ppa.pay_rate / 100, 2 ) else 0 end) AS payAmount1,
             sum( CASE WHEN ppa.pay_type = '20' THEN round( coq.contract_amount_tax_local * ppa.pay_rate / 100, 2 ) else 0 end) AS payAmount2,
@@ -1284,7 +1284,7 @@
         group by pb.subject
     </select>
 
-    <select id="queryList" resultType="org.jeecg.modules.srm.entity.PurPayPlan">
+    <select id="queryList" resultType="org.cmoc.modules.srm.entity.PurPayPlan">
         select
         distinct
         ppp.*,
@@ -1435,7 +1435,7 @@
         group by tmp.proj_type
     </select>
 
-    <select id="fetchPayAmountByMonth" resultType="org.jeecg.modules.srm.entity.PurPayPlan">
+    <select id="fetchPayAmountByMonth" resultType="org.cmoc.modules.srm.entity.PurPayPlan">
         SELECT
             SUBSTR( ppp.pay_time, 1, 7 ) AS `start_month`,
             <if test="query.unit == 'wy'">

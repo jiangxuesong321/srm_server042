@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.BiddingMainMapper">
-    <select id="pageList" resultType="org.jeecg.modules.srm.entity.BiddingMain">
+<mapper namespace="org.cmoc.modules.srm.mapper.BiddingMainMapper">
+    <select id="pageList" resultType="org.cmoc.modules.srm.entity.BiddingMain">
         SELECT
         bm.*,
         pb.proj_name,
@@ -72,7 +72,7 @@
 
         </if>
     </select>
-    <select id="queryPageList" resultType="org.jeecg.modules.srm.entity.BiddingMain">
+    <select id="queryPageList" resultType="org.cmoc.modules.srm.entity.BiddingMain">
         SELECT
             bm.*,
             pb.proj_name,
@@ -167,7 +167,7 @@
         </if>
     </select>
 
-    <select id="evaluateList" resultType="org.jeecg.modules.srm.entity.BiddingMain">
+    <select id="evaluateList" resultType="org.cmoc.modules.srm.entity.BiddingMain">
         SELECT
             bm.*,
             bps.status,
@@ -256,7 +256,7 @@
         </if>
     </select>
 
-    <select id="fetchRecordList" resultType="org.jeecg.modules.srm.entity.BiddingRecord">
+    <select id="fetchRecordList" resultType="org.cmoc.modules.srm.entity.BiddingRecord">
         SELECT
             br.id,
             br.bidding_id,
@@ -303,7 +303,7 @@
           AND br.bidding_id = #{query.id}
     </select>
 
-    <select id="fetchRecordTwoList" resultType="org.jeecg.modules.srm.entity.BiddingRecord">
+    <select id="fetchRecordTwoList" resultType="org.cmoc.modules.srm.entity.BiddingRecord">
         SELECT
             br.id,
             br.bidding_id,
@@ -338,7 +338,7 @@
           AND br.bidding_id = #{query.id}
     </select>
 
-    <select id="getSuppInfo" resultType="org.jeecg.modules.srm.entity.BasSupplier">
+    <select id="getSuppInfo" resultType="org.cmoc.modules.srm.entity.BasSupplier">
         SELECT
             bs.id,
             bs.name,
@@ -359,7 +359,7 @@
           and bd.id = #{query.id}
     </select>
 
-    <select id="fetchQuote" resultType="org.jeecg.modules.srm.entity.BiddingMain">
+    <select id="fetchQuote" resultType="org.cmoc.modules.srm.entity.BiddingMain">
         SELECT
             bm.id,
             bm.bidding_type,
@@ -446,21 +446,21 @@
         GROUP BY bidding_id, supp_id
     </select>
 
-    <select id="fetchProFessionals" resultType="org.jeecg.modules.system.entity.SysUser">
+    <select id="fetchProFessionals" resultType="org.cmoc.modules.system.entity.SysUser">
         select distinct su.* from bidding_professionals bp
         left join sys_user su on bp.professional_id = su.username
         where bp.del_flag = '0'
         and bp.bidding_id = #{id}
     </select>
 
-    <select id="fetchHasProfessionals" resultType="org.jeecg.modules.srm.entity.BiddingProfessionals">
+    <select id="fetchHasProfessionals" resultType="org.cmoc.modules.srm.entity.BiddingProfessionals">
         select distinct professional_name,professional_id,bidding_evaluate_type from bidding_professionals
         where del_flag = '0'
         and bidding_id = #{id}
         and status = '1'
     </select>
 
-    <select id="fetchRecordToProfessionals" resultType="org.jeecg.modules.srm.entity.BiddingRecordToProfessionals">
+    <select id="fetchRecordToProfessionals" resultType="org.cmoc.modules.srm.entity.BiddingRecordToProfessionals">
         SELECT
             brtp.*
         FROM
@@ -473,7 +473,7 @@
           AND bp.professional_id = #{query.professionalId}
     </select>
 
-    <select id="fetchSuppList" resultType="org.jeecg.modules.srm.entity.BasSupplier">
+    <select id="fetchSuppList" resultType="org.cmoc.modules.srm.entity.BasSupplier">
         SELECT DISTINCT
             bs.id,
             bs.`name`

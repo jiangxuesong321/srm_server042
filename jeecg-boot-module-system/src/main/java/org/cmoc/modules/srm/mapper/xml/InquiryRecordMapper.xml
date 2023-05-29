@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.jeecg.modules.srm.mapper.InquiryRecordMapper">
+<mapper namespace="org.cmoc.modules.srm.mapper.InquiryRecordMapper">
 
 	<delete id="deleteByMainId" parameterType="java.lang.String">
 		DELETE 
@@ -8,13 +8,13 @@
 		WHERE
 			 inquiry_id = #{mainId} 	</delete>
 	
-	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.srm.entity.InquiryRecord">
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.cmoc.modules.srm.entity.InquiryRecord">
 		SELECT * 
 		FROM  inquiry_record
 		WHERE
 			 inquiry_id = #{mainId} 	</select>
 
-	<select id="queryRecordList" resultType="org.jeecg.modules.srm.entity.InquiryRecord">
+	<select id="queryRecordList" resultType="org.cmoc.modules.srm.entity.InquiryRecord">
 		SELECT
 			ir.id,
 			ir.prod_code,
@@ -35,7 +35,7 @@
 		  and ir.del_flag = '0'
 	</select>
 
-	<select id="getRecordToSupp" resultType="org.jeecg.modules.srm.entity.InquirySupplier">
+	<select id="getRecordToSupp" resultType="org.cmoc.modules.srm.entity.InquirySupplier">
 		select
 		   isp.id,
 		   isp.is_recommend,
@@ -69,7 +69,7 @@
 			</foreach>
 	</select>
 
-	<select id="getRecordById" resultType="org.jeecg.modules.srm.entity.InquiryRecord">
+	<select id="getRecordById" resultType="org.cmoc.modules.srm.entity.InquiryRecord">
 		SELECT
 			ir.prod_name,
 			ir.prod_code,
