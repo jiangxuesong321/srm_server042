@@ -64,7 +64,7 @@
 	<modules>
         <module>boot-base</module>
 <!--        <module>jeecg-boot-module-demo</module>-->
-        <module>jeecg-boot-module-system</module>
+        <module>boot-module-system</module>
 	</modules>
 
 	<distributionManagement>
@@ -144,17 +144,17 @@
 			<!-- system 模块-->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
-				<artifactId>jeecg-boot-module-system</artifactId>
+				<artifactId>boot-module-system</artifactId>
 				<version>${jeecgboot.version}</version>
 			</dependency>
 
-			<!-- jeecg tools -->
+			<!-- tools -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
 				<artifactId>boot-base-tools</artifactId>
 				<version>${jeecgboot.version}</version>
 			</dependency>
-			<!-- jeecg core -->
+			<!-- core -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
 				<artifactId>boot-base-core</artifactId>
