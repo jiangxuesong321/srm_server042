@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.ContractObjectMapper">
+
+	<delete id="deleteByMainId" parameterType="java.lang.String">
+		DELETE 
+		FROM  contract_object 
+		WHERE
+			 contract_id = #{mainId} 	</delete>
+	
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="com.cmoc.modules.srm.entity.ContractObject">
+		SELECT * 
+		FROM  contract_object
+		WHERE
+			 contract_id = #{mainId} 	</select>
+
+	<select id="getContractDetailList" resultType="com.cmoc.modules.srm.entity.ContractObject">
+		SELECT
+			co.*,
+		    co.contract_price as price,
+			co.contract_price_tax as price_tax,
+		    co.contract_amount as amount,
+			co.contract_amount_tax as amount_tax,
+			co.plan_delivery_date as lead_time,
+		    co.prod_spec_type as spe_type,
+			co.qty as max_qty,
+		    co.contract_price_tax as max_price_tax,
+			bm.country,
+			ifnull(pbr.budget_price,0) as budget_price
+		FROM
+			contract_object co
+			left join bas_material bm on co.prod_code = bm.code
+			left join contract_base cb on co.contract_id = cb.id
+			left join project_bom_relation pbr on co.prod_id = pbr.material_id and cb.category_id = pbr.category_id and pbr.del_flag = '0'
+		where co.contract_id = #{query.id}
+		and co.del_flag = '0'
+	</select>
+
+	<select id="fetchEqpByContract" resultType="com.cmoc.modules.srm.entity.ContractObject">
+		SELECT
+			cb.id,
+			cb.contract_second_party as supp_name,
+			cb.contract_number,
+			cb.contract_name,
+			ifnull(sibe.qty,0) as to_send_qty,
+			co.qty
+		FROM
+			(
+				SELECT
+					sum( co.qty ) AS qty,
+					co.contract_id
+				FROM
+					contract_object co
+				WHERE
+					co.del_flag = '0'
+				  and co.prod_code = #{query.prodCode}
+				group by co.contract_id
+			) co
+			left join contract_base cb on cb.id = co.contract_id
+			left join (
+				select order_id,sum(qty) as qty from stk_io_bill_entry
+				where del_flag = '0'
+			  	and prod_code = #{query.prodCode}
+				group by order_id
+			) sibe on cb.id = sibe.order_id
+		where cb.contract_status = '4'
+
+	</select>
+
+	<select id="fetchEqpPriceByContract" resultType="com.cmoc.modules.srm.entity.ContractObject">
+		SELECT
+			cb.contract_second_party as supp_name,
+			cb.contract_number,
+			cb.contract_name,
+		    cb.contract_currency,
+			cb.id,
+			co.qty,
+			co.contract_price_tax,
+			co.contract_amount_tax,
+			co.prod_code,
+			co.prod_spec_type,
+			co.prod_brand as brand_name,
+			cb.contract_valid_date
+		FROM
+			contract_object co
+			left join contract_base cb on co.contract_id = cb.id
+		where co.del_flag = '0'
+		  and cb.contract_status = '4'
+		  and co.prod_code = #{query.prodCode}
+	</select>
+
+	<select id="fetchEqpSuppByContract" resultType="com.cmoc.modules.srm.entity.BasSupplier">
+		SELECT
+			distinct
+			bs.name,
+			bs.code,
+			bs.supplier_type,
+			bs.register_area,
+			cb.contract_second_contact as contacter,
+			cb.contract_second_telphone as contacter_tel,
+			co.prod_spec_type,
+		    co.prod_brand as brand_name
+		FROM
+			contract_object co
+			inner join contract_base cb on co.contract_id = cb.id
+			inner join bas_supplier bs on cb.contract_second_party_id = bs.id
+		where co.del_flag = '0'
+		  and cb.contract_status = '4'
+		  and co.prod_code = #{query.prodCode}
+	</select>
+
+	<select id="fetchTotalByEqp" resultType="com.cmoc.modules.srm.entity.ContractObject">
+		SELECT
+			co.prod_code,
+		    sum(co.qty) as qty
+		FROM
+			contract_object co
+			left join contract_base cb on co.contract_id = cb.id
+		where co.del_flag = '0'
+		  and cb.contract_status = '4'
+		  and co.prod_code in
+		<foreach collection="prodCodes" item="item" open="(" close=")" separator="," >
+			#{item}
+		</foreach>
+		group by co.prod_code
+	</select>
+
+	<select id="fetchAmountByModel" resultType="com.cmoc.modules.srm.entity.ContractObject">
+		SELECT
+			sum(ifnull(vcra.contract_amount_tax_local,co.contract_amount_tax_local) ) AS contract_amount_tax_local,
+			cb.project_id,
+			bm.model
+		FROM
+			contract_object co
+			inner join contract_base cb on co.contract_id = cb.id
+			left join bas_material bm on co.prod_code = bm.code
+			left join view_contract_record_amount vcra on co.id = vcra.record_id
+		WHERE
+			co.del_flag = '0'
+		  	and cb.contract_status = '4'
+			and cb.project_id = #{query.projectId}
+			and cb.main_id is null
+		GROUP BY
+			cb.project_id,
+			bm.model
+	</select>
+
+	<select id="fetchAmountByCategory" resultType="com.cmoc.modules.srm.entity.ContractObject">
+		select tmp.project_id,tmp.category_id,sum(tmp.contract_amount_tax_local) as contract_amount_tax_local from (
+		  SELECT
+			  sum(ifnull(vcra.contract_amount_tax_local,co.contract_amount_tax_local) ) AS contract_amount_tax_local,
+			  cb.project_id,
+			  cb.category_id
+		  FROM
+			  contract_object co
+			  inner join contract_base cb on co.contract_id = cb.id
+			  left join view_contract_record_amount vcra on co.id = vcra.record_id
+		  WHERE
+			  co.del_flag = '0'
+			and cb.contract_status = '4'
+			and cb.project_id = #{query.projectId}
+		  	and cb.main_id is null
+		  GROUP BY
+			  cb.project_id,
+			  cb.category_id
+		  union all
+		  select
+			  sum(pcp.pay_amount) as contract_amount_tax_local,
+			  pcp.project_id,
+			  pcp.category_id
+		  from project_category_pay pcp
+		  where pcp.del_flag = '0'
+			and pcp.type = '0'
+			and pcp.project_id = #{query.projectId}
+		  group by pcp.project_id,pcp.category_id
+	  	)tmp
+		group by tmp.project_id,tmp.category_id
+	</select>
+
+	<select id="listByDetailList" resultType="com.cmoc.modules.srm.entity.ContractObject">
+		select co.*
+		from contract_object_qty co
+		where co.del_flag = '0'
+		and co.contract_id = #{query.contractId}
+		<if test="query.ptype == 'entry'">
+			and co.qty > co.to_send_qty
+		</if>
+		<if test="query.ptype == 'return'">
+			and co.qty > co.to_return_qty
+		</if>
+		<if test="query.prodCode != null and query.prodCode != ''">
+			AND co.prod_code LIKE concat(concat('%',#{query.prodCode}),'%')
+		</if>
+		<if test="query.prodName != null and query.prodName != ''">
+			AND co.prod_name LIKE concat(concat('%',#{query.prodName}),'%')
+		</if>
+		<if test="query.prodSpecType != null and query.prodSpecType != ''">
+			AND co.prod_spec_type LIKE concat(concat('%',#{query.prodSpecType}),'%')
+		</if>
+		<if test="query.sort != null and query.sort1 == null">
+			AND co.sort >= #{query.sort}
+		</if>
+		<if test="query.sort != null and query.sort1 != null">
+			AND co.sort between #{query.sort} and #{query.sort1}
+		</if>
+		order by co.sort
+	</select>
+
+	<select id="fetchContractQty" resultType="com.cmoc.modules.srm.entity.ContractObject">
+		SELECT
+			ROUND((ifnull(cb.qty,0) / ifnull(pbr.qty,0)) * 100,2) as qty
+		FROM
+			(
+				SELECT
+					sum( qty ) AS qty,
+					1 as id
+				FROM
+					project_bom_relation
+				WHERE del_flag = '0'
+				<if test="query.projectId != null and query.projectId != ''">
+					and proj_id = #{query.projectId}
+				</if>
+				<if test="query.model != null and query.model != ''">
+					and model = #{query.model}
+				</if>
+			) pbr
+		INNER JOIN
+			(
+			SELECT
+				sum( qty) as qty,
+				1 as id
+			FROM
+				contract_object co
+				inner join contract_base cb on co.contract_id = cb.id
+				inner join bas_material bm on co.prod_code = bm.code
+			WHERE co.del_flag = '0'
+				and cb.contract_status = '4'
+			  	and cb.main_id is null
+				<if test="query.projectId != null and query.projectId != ''">
+					and cb.project_id = #{query.projectId}
+				</if>
+				<if test="query.model != null and query.model != ''">
+					and bm.model = #{query.model}
+				</if>
+			) cb
+		ON pbr.id = cb.id
+	</select>
+</mapper>

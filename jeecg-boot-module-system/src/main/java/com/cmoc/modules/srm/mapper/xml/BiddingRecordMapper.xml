@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.BiddingRecordMapper">
+
+	<delete id="deleteByMainId" parameterType="java.lang.String">
+		DELETE 
+		FROM  bidding_record 
+		WHERE
+			 bidding_id = #{mainId} 	</delete>
+	
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="com.cmoc.modules.srm.entity.BiddingRecord">
+		SELECT * 
+		FROM  bidding_record
+		WHERE
+			 bidding_id = #{mainId} 	</select>
+
+	<select id="queryRecordList" resultType="com.cmoc.modules.srm.entity.BiddingRecord">
+		SELECT
+			br.prod_name,
+			br.prod_code,
+			br.id,
+			br.qty as req_qty,
+			brs.bidding_qty as qty,
+			bqr.spe_type,
+			bqr.brand_name as prod_brand,
+			br.unit_id,
+			br.prod_id,
+			bm.model,
+			bm.country,
+			bqr.capacity,
+			bqr.price,
+			round(bqr.price * brs.bidding_qty,2) as amount,
+			bqr.price_tax,
+			round(bqr.price_tax * brs.bidding_qty,2) as amount_tax,
+			bqr.lead_time,
+			bq.amount as other_amount,
+		    bq.add_tax,
+		    bq.customs_tax,
+			ifnull(bqr.tax_rate,bq.tax_rate) as tax_rate,
+			bqr.id as quote_record_id,
+			ifnull(pbr.budget_price,0) as budget_price
+		FROM
+			bidding_record_supplier brs
+		    left join bidding_record br on brs.record_id = br.id and br.del_flag = '0'
+
+			left join purchase_request_detail prd on br.to_record_id = prd.id
+			left join purchase_request_main prm on prd.req_id = prm.id
+			left join project_bom_relation pbr on prd.prod_id = pbr.material_id and prm.category_id = pbr.category_id and pbr.del_flag = '0'
+
+			left join bas_material bm on br.prod_id = bm.id
+			left join bidding_quote_record bqr on br.id = bqr.record_id and bqr.del_flag = '0' and brs.supplier_id = bqr.supp_id
+			left join bidding_quote bq on bqr.quote_id = bq.id
+		where br.del_flag = '0'
+		      and brs.bs_id = #{id}
+			  and brs.is_recommend = '1'
+	</select>
+
+	<select id="querySuppList" resultType="com.cmoc.modules.srm.entity.BiddingSupplier">
+		SELECT
+		    distinct
+			bs1.name,
+			bs1.code,
+			bs1.id,
+			bs.status,
+			bsc.contacter,
+			bsc.contacter_tel,
+			bsc.contacter_email
+		FROM
+			bidding_supplier bs
+			left join bas_supplier bs1 on bs.supplier_id = bs1.id
+			left join bas_supplier_contact bsc on bs1.id = bsc.supplier_id and bsc.is_default = '1'
+		where bs.del_flag = '0'
+		      and bs.bidding_id = #{id}
+	</select>
+
+	<select id="queryTemplateList" resultType="com.cmoc.modules.srm.entity.BiddingProfessionals">
+		SELECT
+			bp.bidding_id,
+			GROUP_CONCAT(bp.professional_id) as professional_id,
+			GROUP_CONCAT(bp.professional_name) as professional_name,
+			bp.bidding_evaluate_type,
+			bp.item_name,
+			bp.item_score,
+			bp.item_standard,
+			bp.weight
+		FROM
+			bidding_professionals bp
+		WHERE
+			bp.del_flag = '0'
+			and bp.bidding_id = #{id}
+		group by bp.bidding_id,bp.bidding_evaluate_type,bp.item_name
+	</select>
+
+	<select id="queryRecordListByMainId" resultType="com.cmoc.modules.srm.entity.BiddingRecord">
+		SELECT
+			br.prod_name,
+			br.prod_code,
+			br.id,
+			br.qty,
+			br.unit_id,
+			br.prod_id,
+			br.lead_time,
+			br.bidding_id,
+			bm.model,
+			prd.capacity,
+			prd.single_capacity,
+			prd.spe_type,
+			prd.brand_name,
+			prd.qty as max_qty
+		FROM
+			bidding_record br
+			left join bas_material bm on br.prod_id = bm.id
+			left join purchase_request_detail prd on br.to_record_id = prd.id
+		where br.del_flag = '0'
+		  and br.bidding_id = #{id}
+	</select>
+
+</mapper>

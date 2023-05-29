@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.InquiryListMapper">
+    <select id="queryPageList" resultType="com.cmoc.modules.srm.entity.InquiryList">
+        SELECT
+            il.id,
+            il.inquiry_code,
+            il.quotation_deadline,
+            il.inquirer,
+            il.inquirer_tel,
+            il.inquiry_date,
+            il.COMMENT,
+            il.remark,
+            il.inquiry_status,
+            il.round_num,
+            il.inquiry_name,
+            il.invitation_method,
+            il.currency,
+            il.is_one,
+            il.is_notice,
+            il.project_id,
+            il.request_id,
+            il.create_user,
+            il.create_time,
+            il.attachment,
+            il.other_attachment,
+            pb.proj_name as project_name,
+            prm.req_type,
+            prm.attachment as purAttachment,
+            prm.other_attachment as pur_other_attachment,
+            prm.comment  purComment
+        FROM
+            inquiry_list il
+            left join proj_base pb on il.project_id = pb.id
+            left join purchase_request_main prm on il.request_id = prm.id
+        WHERE
+            il.del_flag = '0'
+            <if test="query.inquiryCode != null and query.inquiryCode != ''">
+                AND il.inquiry_code LIKE concat(concat('%',#{query.inquiryCode}),'%')
+            </if>
+            <if test="query.inquiryName != null and query.inquiryName != ''">
+                AND il.inquiry_name LIKE concat(concat('%',#{query.inquiryName}),'%')
+            </if>
+            <if test="query.reqType != null and query.reqType != ''">
+                AND prm.req_type = #{query.reqType}
+            </if>
+            <if test="query.invitationMethod != null and query.invitationMethod != ''">
+                AND il.invitation_method = #{query.invitationMethod}
+            </if>
+            <if test="query.inquiryStatus != null and query.inquiryStatus != '' and query.inquiryStatus != 'all' ">
+                AND il.inquiry_status = #{query.inquiryStatus}
+            </if>
+            <if test="query.auth == 'owner'">
+                AND il.create_user = #{query.auther}
+            </if>
+            <if test="query.auth == 'dept'">
+                AND (select depart_ids from sys_user su where il.create_user = su.username) = #{query.auther}
+            </if>
+            <if test="query.auth == 'subject'">
+                AND pb.subject in
+                <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                    #{item}
+                </foreach>
+            </if>
+
+            <if test="query.column != null and query.column != ''">
+                <if test="query.column == 'inquiryCode'">
+                    order by il.inquiry_code
+                </if>
+                <if test="query.column == 'inquiryName'">
+                    order by il.inquiry_name
+                </if>
+                <if test="query.column == 'projectName'">
+                    order by pb.proj_name
+                </if>
+                <if test="query.column == 'invitationMethod'">
+                    order by il.invitation_method
+                </if>
+                <if test="query.column == 'reqType'">
+                    order by prm.req_type
+                </if>
+                <if test="query.column == 'inquiryStatus'">
+                    order by il.inquiry_status
+                </if>
+                <if test="query.column == 'createUser'">
+                    order by il.create_user
+                </if>
+                <if test="query.column == 'quotationDeadline'">
+                    order by il.quotation_deadline
+                </if>
+                <if test="query.column == 'createTime'">
+                    order by il.create_time
+                </if>
+                <if test="query.order == 'asc'">
+                    asc
+                </if>
+                <if test="query.order == 'desc'">
+                    desc
+                </if>
+            </if>
+    </select>
+
+    <select id="queryPageToDetailList" resultType="com.cmoc.modules.srm.entity.InquiryList">
+        SELECT
+            il.inquiry_code,
+            il.quotation_deadline,
+            il.inquirer,
+            il.inquirer_tel,
+            il.inquiry_date,
+            il.COMMENT,
+            il.remark,
+            il.inquiry_status,
+            il.round_num,
+            il.inquiry_name,
+            il.invitation_method,
+            sq.currency,
+            sq.tax_rate,
+            il.is_one,
+            il.is_notice,
+            il.project_id,
+            il.request_id,
+            il.create_user,
+            il.create_time,
+            il.attachment,
+            pb.proj_name as project_name,
+            pb.proj_code,
+            prm.req_type,
+            prm.category_id,
+            ir.inquiry_id,
+            ir.id,
+            ir.prod_name,
+            ir.unit_id,
+            ir.spe_type,
+            ir.prod_code,
+            iss.id as bs_id,
+            iss.inquiry_qty as qty,
+            bs.name as supp_name,
+            sd.id as contractFirstPartyId,
+            sd.depart_name as contractFirstParty,
+            sd.mobile as contractFirstTelphone,
+            sd.fax as contractFirstFax,
+            sd.address as contractFirstAddress,
+            sd.contacter as contractFirstContact,
+            sd.corporate as contractFirstLegalPerson,
+            sd.agent as contractFirstAgent,
+            sd.bank_name as contractFirstOpeningBank,
+            sd.bank_account as contractFirstBankAccount,
+            sd.post_code as contractFirstPostCode
+        FROM
+            inquiry_record ir
+            left join inquiry_list il on ir.inquiry_id = il.id
+            left join proj_base pb on il.project_id = pb.id
+            left join sys_depart sd on pb.subject = sd.id
+            left join purchase_request_main prm on il.request_id = prm.id
+            left join inquiry_supplier iss on ir.id = iss.record_id
+            left join bas_supplier bs on iss.supplier_id = bs.id
+            left join sup_quote sq on ir.id = sq.record_id and iss.supplier_id = sq.supp_id
+        WHERE
+            ir.del_flag = '0'
+            and iss.is_contract = '0'
+            and iss.del_flag = '0'
+            and iss.is_recommend = '1'
+            <if test="query.auth == 'owner'">
+                AND il.create_user = #{query.auther}
+            </if>
+            <if test="query.auth == 'dept'">
+                AND (select depart_ids from sys_user su where il.create_user = su.username) = #{query.auther}
+            </if>
+            <if test="query.auth == 'subject'">
+                AND pb.subject in
+                <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                    #{item}
+                </foreach>
+            </if>
+            <if test="query.inquiryCode != null and query.inquiryCode != ''">
+                AND il.inquiry_code LIKE concat(concat('%',#{query.inquiryCode}),'%')
+            </if>
+            <if test="query.inquiryName != null and query.inquiryName != ''">
+                AND il.inquiry_name LIKE concat(concat('%',#{query.inquiryName}),'%')
+            </if>
+            <if test="query.reqType != null and query.reqType != ''">
+                AND prm.req_type = #{query.reqType}
+            </if>
+            <if test="query.invitationMethod != null and query.invitationMethod != ''">
+                AND il.invitation_method = #{query.invitationMethod}
+            </if>
+            <if test="query.inquiryStatus != null and query.inquiryStatus != '' and query.inquiryStatus != 'all' ">
+                AND il.inquiry_status = #{query.inquiryStatus}
+            </if>
+
+            <if test="query.column != null and query.column != ''">
+                <if test="query.column == 'inquiryCode'">
+                    order by il.inquiry_code
+                </if>
+                <if test="query.column == 'inquiryName'">
+                    order by il.inquiry_name
+                </if>
+                <if test="query.column == 'suppName'">
+                    order by bs.name
+                </if>
+                <if test="query.column == 'projectName'">
+                    order by pb.proj_name
+                </if>
+                <if test="query.column == 'prodCode'">
+                    order by ir.prod_code
+                </if>
+                <if test="query.column == 'prodName'">
+                    order by ir.prod_name
+                </if>
+                <if test="query.column == 'qty'">
+                    order by iss.inquiry_qty
+                </if>
+                <if test="query.column == 'invitationMethod'">
+                    order by il.invitation_method
+                </if>
+
+                <if test="query.column == 'reqType'">
+                    order by prm.req_type
+                </if>
+                <if test="query.column == 'inquiryStatus'">
+                    order by il.inquiry_status
+                </if>
+
+                <if test="query.column == 'createTime'">
+                    order by il.create_time
+                </if>
+                <if test="query.order == 'asc'">
+                    asc
+                </if>
+                <if test="query.order == 'desc'">
+                    desc
+                </if>
+            </if>
+    </select>
+
+    <select id="fetchSuppList" resultType="com.cmoc.modules.srm.entity.BasSupplier">
+        SELECT DISTINCT
+            bs.id,
+            bs.NAME
+        FROM
+            inquiry_supplier iss
+            INNER JOIN bas_supplier bs ON iss.supplier_id = bs.id
+        WHERE
+            iss.del_flag = '0'
+        and iss.inquiry_id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.BiddingBarginRecordMapper">
+    <select id="fetchHistoryPrice" resultType="com.cmoc.modules.srm.entity.BiddingBarginRecord">
+        select
+               bbr.bg_price_tax,
+               bbr.supp_bg_price_tax,
+               bs.name as supp_name,
+               br.prod_name,
+               br.prod_code
+        from bidding_bargin_record bbr
+        inner join bas_supplier bs on bbr.supp_id = bs.id
+        inner join bidding_record br on bbr.record_id = br.id
+        where bbr.del_flag = '0'
+        and bbr.bidding_id = #{id}
+        and bbr.supp_bg_price_tax is not null
+        and bbr.bg_price_tax is not null
+    </select>
+
+    <select id="fetchPriceHistory" resultType="com.cmoc.modules.srm.entity.BiddingBarginRecord">
+        select
+            bbr.bg_price_tax,
+            bbr.supp_bg_price_tax,
+            bbr.create_time,
+            bbr.attachment
+        from bidding_bargin_record bbr
+        where bbr.del_flag = '0'
+          and bbr.record_id = #{query.recordId}
+          and bbr.supp_id = #{query.suppId}
+        order by bbr.create_time desc
+    </select>
+</mapper>

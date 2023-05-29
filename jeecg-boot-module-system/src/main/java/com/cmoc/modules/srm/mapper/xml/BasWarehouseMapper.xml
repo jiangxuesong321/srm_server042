@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.BasWarehouseMapper">
+    <select id="queryPageList" resultType="com.cmoc.modules.srm.entity.BasWarehouse">
+        SELECT
+            bw.*,
+            ifnull( sibe.qty, 0 ) AS qty,
+            ifnull(sibe1.count,0) as count_num
+        FROM
+            bas_warehouse bw
+            LEFT JOIN (
+                SELECT
+                sum( sibe.stock_qty ) AS qty,
+                sib.wh_id
+                FROM
+                stk_io_bill_entry sibe
+                INNER JOIN stk_io_bill sib ON sibe.mid = sib.id
+                WHERE
+                sibe.del_flag = '0'
+                and sib.status = '1'
+                GROUP BY
+                sib.wh_id
+            ) sibe ON bw.id = sibe.wh_id
+            LEFT JOIN (
+                SELECT
+                count(DISTINCT sibe.prod_code) as count,
+                sib.wh_id
+                FROM
+                stk_io_bill_entry sibe
+                INNER JOIN stk_io_bill sib ON sibe.mid = sib.id
+                WHERE
+                sibe.del_flag = '0'
+                and sib.status = '1'
+                GROUP BY
+            sib.wh_id
+            ) sibe1 on bw.id = sibe1.wh_id
+        WHERE
+            1=1
+            and bw.del_flag = '0'
+            <if test="query.isEnabled != null">
+                and bw.is_enabled = #{query.isEnabled}
+            </if>
+            <if test="query.code != null and query.code != ''">
+                and bw.code
+                LIKE concat(concat('%',#{query.code}),'%')
+            </if>
+            <if test="query.name != null and query.name != ''">
+                and bw.name
+                LIKE concat(concat('%',#{query.name}),'%')
+            </if>
+            <if test="query.column != null and query.column != ''">
+                <if test="query.column == 'code'">
+                    order by bw.code
+                </if>
+                <if test="query.column == 'area'">
+                    order by bw.area
+                </if>
+                <if test="query.column == 'name'">
+                    order by bw.name
+                </if>
+                <if test="query.column == 'countNum'">
+                    order by ifnull(sibe1.count,0)
+                </if>
+                <if test="query.column == 'qty'">
+                    order by ifnull( sibe.qty, 0 )
+                </if>
+                <if test="query.column == 'isEnabled'">
+                    order by bw.is_enabled
+                </if>
+                <if test="query.column == 'createTime'">
+                    order by bw.create_time
+                </if>
+                <if test="query.order == 'asc'">
+                    asc
+                </if>
+                <if test="query.order == 'desc'">
+                    desc
+                </if>
+            </if>
+
+    </select>
+
+    <select id="exportXls" resultType="com.cmoc.modules.srm.entity.BasWarehouse">
+        SELECT
+            bw.*,
+            ifnull( sibe.qty, 0 ) AS qty,
+            ifnull(sibe1.count,0) as count_num
+        FROM
+            bas_warehouse bw
+            LEFT JOIN (
+                SELECT
+                sum( sibe.stock_qty ) AS qty,
+                sib.wh_id
+                FROM
+                stk_io_bill_entry sibe
+                INNER JOIN stk_io_bill sib ON sibe.mid = sib.id
+                WHERE
+                sibe.del_flag = '0'
+                and sib.status = '1'
+                GROUP BY
+                sib.wh_id
+            ) sibe ON bw.id = sibe.wh_id
+            LEFT JOIN (
+                SELECT
+                count(DISTINCT sibe.prod_code) as count,
+                sib.wh_id
+                FROM
+                stk_io_bill_entry sibe
+                INNER JOIN stk_io_bill sib ON sibe.mid = sib.id
+                WHERE
+                sibe.del_flag = '0'
+                and sib.status = '1'
+                GROUP BY
+                sib.wh_id
+            ) sibe1 on bw.id = sibe1.wh_id
+        WHERE
+        1=1
+        and bw.del_flag = '0'
+        <if test="query.isEnabled != null">
+            and bw.is_enabled = #{query.isEnabled}
+        </if>
+        <if test="query.code != null and query.code != ''">
+            and bw.code
+            LIKE concat(concat('%',#{query.code}),'%')
+        </if>
+        <if test="query.name != null and query.name != ''">
+            and bw.name
+            LIKE concat(concat('%',#{query.name}),'%')
+        </if>
+        <if test="query.column != null and query.column != ''">
+            <if test="query.column == 'code'">
+                order by bw.code
+            </if>
+            <if test="query.column == 'area'">
+                order by bw.area
+            </if>
+            <if test="query.column == 'name'">
+                order by bw.name
+            </if>
+            <if test="query.column == 'countNum'">
+                order by ifnull(sibe1.count,0)
+            </if>
+            <if test="query.column == 'qty'">
+                order by ifnull( sibe.qty, 0 )
+            </if>
+            <if test="query.column == 'isEnabled'">
+                order by bw.is_enabled
+            </if>
+            <if test="query.column == 'createTime'">
+                order by bw.create_time
+            </if>
+            <if test="query.order == 'asc'">
+                asc
+            </if>
+            <if test="query.order == 'desc'">
+                desc
+            </if>
+        </if>
+
+    </select>
+</mapper>

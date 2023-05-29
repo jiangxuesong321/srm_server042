@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.PurchaseApplyInvoiceMapper">
+    <select id="fetchDetailListByContractId" resultType="com.cmoc.modules.srm.entity.PurchaseApplyInvoice">
+        SELECT
+            sum(pai.invoice_amount_tax) as invoice_amount_tax
+        FROM
+            purchase_pay_inovice ppi
+            inner join purchase_apply_invoice pai on ppi.id = pai.invoice_id
+            inner join pur_pay_plan_detail pppd on pai.apply_id = pppd.pay_apply_id
+            inner join pur_pay_plan ppp on pppd.pay_plan_id = ppp.id
+            inner join contract_base cb on ppi.contract_id = cb.id
+        where ppi.del_flag = '0'
+          and pai.del_flag = '0'
+          and ppp.pay_status = '2'
+          and (cb.id = #{contractId} or cb.main_id = #{contractId})
+          and pai.apply_id not in
+            <foreach collection="ids" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+    </select>
+
+    <select id="fetchDetailListByApplyids" resultType="com.cmoc.modules.srm.entity.PurchaseApplyInvoice">
+        SELECT
+            sum(pai.invoice_amount_tax) as invoice_amount_tax,
+            pai.apply_id
+        FROM
+        purchase_apply_invoice pai
+        where  pai.del_flag = '0'
+        and pai.apply_id in
+        <foreach collection="ids" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        group by pai.apply_id
+    </select>
+</mapper>
