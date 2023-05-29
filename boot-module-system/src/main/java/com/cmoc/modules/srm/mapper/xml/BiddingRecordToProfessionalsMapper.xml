@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.BiddingRecordToProfessionalsMapper">
+    <select id="fetchResult" resultType="com.cmoc.modules.srm.entity.BiddingRecordToProfessionals">
+        SELECT
+            brtp.bs_id,
+            sum(brtp.item_score) as item_score,
+            bp.bidding_evaluate_type AS type
+        FROM
+            bidding_record_to_professionals brtp
+                LEFT JOIN bidding_professionals bp ON brtp.bps_id = bp.id
+        WHERE
+            brtp.del_flag = '0'
+            and brtp.is_submit = '1'
+        group by brtp.bs_id,bp.bidding_evaluate_type
+        order by bp.bidding_evaluate_type
+    </select>
+</mapper>

@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.ProjBaseMapper">
+    <select id="fetchProjById" resultType="com.cmoc.modules.srm.entity.ProjBase">
+        
+    </select>
+
+    <select id="pageList" resultType="com.cmoc.modules.srm.entity.ProjBase">
+        SELECT
+            distinct
+            pb.id,
+            pb.proj_name,
+            pb.proj_code,
+            pb.proj_type,
+            pb.proj_description,
+            pb.proj_background,
+            pb.proj_initiation_date,
+            pb.apply_org_id,
+            pb.proj_status,
+            pb.comment,
+            pb.sort,
+            pb.tenant_id,
+            pb.del_flag,
+            pb.create_user,
+            pb.update_user,
+            pb.create_time,
+            pb.update_time,
+            pb.project_manager,
+            pb.apply_user_id,
+            pb.apply_user_name,
+            pb.apply_org_name,
+            pb.budget_amount,
+            pb.proj_amount,
+            round(pb.budget_amount / pb.proj_amount * 100,2) as budget_percent,
+            round(ifnull(cb.contract_amount_tax_local,0) / pb.budget_amount * 100,2) as contract_percent,
+            ifnull(cb.contract_amount_tax_local,0) as used_amount,
+            pb.proj_capacity,
+            case
+                when (pb.budget_amount - cb.contract_amount_tax_local) >= 0
+                    then (pb.budget_amount - cb.contract_amount_tax_local)
+            else 0 end remain_amount,
+            pb.in_attachment,
+            pb.out_attachment,
+            pb.other_attachment,
+            pb.subject,
+            case when ast.id is not null then '1' else '0' end isDisabled,
+            ifnull(ppp.pay_amount,0) as pay_amount
+        FROM
+            proj_base pb
+            left join (
+                select tmp.project_id,sum(tmp.contract_amount_tax_local) as contract_amount_tax_local from (
+                    SELECT
+                    sum(ifnull(vca.contract_amount_tax_local,cb.contract_amount_tax_local)) as contract_amount_tax_local,
+                    cb.project_id
+                    FROM
+                    contract_base cb
+                    left join view_contract_amount vca on cb.id = vca.contract_id
+                    where cb.del_flag = '0'
+                    and cb.contract_status = '4'
+                    and cb.main_id is null
+                    group by cb.project_id
+                    union all
+                    select
+                    sum(pcp.pay_amount) as contract_amount_tax_local,
+                    pcp.project_id
+                    from project_category_pay pcp
+                    where pcp.del_flag = '0'
+                    and pcp.type = '0'
+                    group by pcp.project_id
+                ) tmp
+                group by tmp.project_id
+            ) cb on pb.id = cb.project_id
+            left join (
+                select project_id,sum(pay_amount) as pay_amount from (
+                    SELECT
+                        sum(
+                            CASE
+                            WHEN cb.contract_currency != 'RMB' THEN
+                            ifnull( sibe.contract_amount_tax_local + sibe.other_amount_local, ppad.pay_amount ) ELSE ppad.pay_amount
+                            END
+                        ) pay_amount,
+                        cb.project_id
+                    FROM
+                        (
+                            SELECT
+                                ppa.contract_id,
+                                sum( ppad.contract_amount_tax_local ) AS pay_amount,
+                                sum( ppad.contract_amount_tax ) AS pay_amount_other,
+                                ppad.bill_detail_id
+                            FROM
+                                pur_pay_apply_detail ppad
+                                INNER JOIN pur_pay_plan_detail pppd ON ppad.apply_id = pppd.pay_apply_id
+                                INNER JOIN pur_pay_plan ppp ON pppd.pay_plan_id = ppp.id
+                                INNER JOIN pur_pay_apply ppa ON ppad.apply_id = ppa.id
+                            WHERE
+                                ppad.del_flag = '0'
+                                AND ppp.pay_status = '2'
+                            GROUP BY
+                                ppa.contract_id,
+                                ppad.bill_detail_id
+                        ) ppad
+                        INNER JOIN contract_base cb ON ppad.contract_id = cb.id
+                        LEFT JOIN stk_io_bill_entry sibe ON ppad.bill_detail_id = sibe.order_detail_id AND sibe.del_flag = '0'
+                    group by cb.project_id
+                    union all
+                    select sum(pcp.pay_amount) as pay_amount,pcp.project_id from project_category_pay pcp
+                    where pcp.del_flag = '0'
+                    and pcp.type = '1'
+                    group by pcp.project_id
+                ) tmp
+                group by project_id
+            ) ppp on pb.id = ppp.project_id
+            left join approve_setting ast on pb.subject = ast.company and ast.username = #{query.createUser} and ast.type = 'project'
+        where pb.del_flag = '0'
+        <if test="query.id != null and query.id != ''">
+            AND pb.id = #{query.id}
+        </if>
+        <if test="query.auth == 'owner'">
+            AND pb.apply_user_id = #{query.auther}
+        </if>
+        <if test="query.auth == 'dept'">
+            AND pb.apply_org_id = #{query.auther}
+        </if>
+        <if test="query.auth == 'subject'">
+            AND pb.subject in
+            <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.subject != null and query.subject != ''">
+            AND pb.subject = #{query.subject}
+        </if>
+        <if test="query.projCode != null and query.projCode != ''">
+            AND pb.proj_code LIKE concat(concat('%',#{query.projCode}),'%')
+        </if>
+        <if test="query.projName != null and query.projName != ''">
+            AND pb.proj_name LIKE concat(concat('%',#{query.projName}),'%')
+        </if>
+        <if test="query.projStatus != null and query.projStatus != ''">
+            AND pb.proj_status = #{query.projStatus}
+        </if>
+        <if test="query.applyOrgId != null and query.applyOrgId != ''">
+            AND pb.apply_org_id = #{query.applyOrgId}
+        </if>
+        <if test="query.column != null and query.column != ''">
+            <if test="query.column == 'projCode'">
+                order by pb.proj_code
+            </if>
+            <if test="query.column == 'projName'">
+                order by pb.proj_name
+            </if>
+            <if test="query.column == 'applyUserId'">
+                order by pb.apply_user_id
+            </if>
+            <if test="query.column == 'applyOrgId'">
+                order by pb.apply_org_id
+            </if>
+            <if test="query.column == 'projInitiationDate'">
+                order by pb.proj_initiation_date
+            </if>
+            <if test="query.column == 'budgetAmount'">
+                order by pb.budget_amount
+            </if>
+            <if test="query.column == 'projAmount'">
+                order by pb.proj_amount
+            </if>
+            <if test="query.column == 'usedAmount'">
+                order by ifnull(cb.contract_amount_tax_local,0)
+            </if>
+            <if test="query.column == 'remainAmount'">
+                order by case
+                when (pb.budget_amount - cb.contract_amount_tax_local) >= 0
+                then (pb.budget_amount - cb.contract_amount_tax_local)
+                else 0 end
+            </if>
+            <if test="query.column == 'payAmount'">
+                order by ifnull(ppp.pay_amount,0)
+            </if>
+            <if test="query.column == 'sort'">
+                order by pb.sort
+            </if>
+            <if test="query.column == 'createTime'">
+                order by pb.create_time
+            </if>
+            <if test="query.order == 'asc'">
+                asc
+            </if>
+            <if test="query.order == 'desc'">
+                desc
+            </if>
+
+        </if>
+    </select>
+
+    <select id="fetchCapacityByProjId" resultType="com.cmoc.modules.srm.entity.ProjBase">
+        select
+           a.proj_id as id,
+           round(ifnull(b.capacity,0) / ifnull(a.capacity,0),2) as capacity
+        from (
+            SELECT
+              pbr.proj_id,
+              sum(pbr.qty * pbr.capacity) as capacity
+            FROM
+              project_bom_relation pbr
+            WHERE
+              pbr.del_flag = '0'
+              and pbr.proj_id = #{query.id}
+            group by pbr.proj_id
+        ) a
+        left join (
+            SELECT
+                cb.project_id,
+                sum(co.qty * co.capacity) as capacity
+            FROM
+                contract_object co
+                    inner join contract_base cb on co.contract_id = cb.id
+            WHERE
+                co.del_flag = '0'
+              and cb.contract_status = '4'
+              and cb.project_id = #{query.id}
+            group by cb.project_id
+        ) b on a.proj_id = b.project_id
+
+    </select>
+
+    <select id="fetchCategoryAmount" resultType="map">
+        SELECT
+            distinct
+            pc.name,
+            pc.budget_amount as budgetAmount,
+            pc.id,
+            IFNULL(ct.contract_amount,0) + IFNULL(pcp.pay_amount,0) as contractAmount,
+            IFNULL(pa.pay_amount,0) + IFNULL(pcp1.pay_amount,0) as payAmount
+        FROM
+            project_category pc
+            left join (
+            SELECT
+                sum(ifnull(vcra.contract_amount_tax_local,co.contract_amount_tax_local) ) AS contract_amount,
+                cb.project_id,
+                cb.category_id
+            FROM
+                contract_object co
+                inner join contract_base cb on co.contract_id = cb.id
+                left join view_contract_record_amount vcra on co.id = vcra.record_id
+            where cb.del_flag = '0'
+                and cb.contract_status = '4'
+                and cb.project_id = #{query.id}
+                and cb.main_id is null
+            group by
+                cb.project_id,
+                cb.category_id
+            ) ct on pc.id = ct.category_id and pc.project_id = ct.project_id
+            left join (
+            SELECT
+                sum(ppa.pay_amount) as pay_amount,
+                cb.project_id,
+                cb.category_id
+            FROM
+                pur_pay_plan_detail pppd
+                inner join pur_pay_apply ppa on pppd.pay_apply_id = ppa.id
+                inner join contract_base cb on ppa.contract_id = cb.id
+            WHERE
+                pppd.del_flag = '0'
+              and cb.project_id = #{query.id}
+              and EXISTS (
+                    select ppp.id from pur_pay_plan ppp where pppd.pay_plan_id = ppp.id
+                                                          and ppp.pay_status = '2'
+                )
+            group by
+                cb.project_id,
+                cb.category_id
+            ) pa on pc.id = pa.category_id and pc.project_id = pa.project_id
+            left join (
+                select sum(pcp.pay_amount) as pay_amount,pcp.category_id,pcp.project_id from project_category_pay pcp
+                where pcp.del_flag = '0'
+                and pcp.project_id = #{query.id}
+                and pcp.type = '0'
+                group by pcp.category_id,pcp.project_id
+            ) pcp on pc.id = pcp.category_id and pc.project_id = pcp.project_id
+            left join (
+                select sum(pcp.pay_amount) as pay_amount,pcp.category_id,pcp.project_id from project_category_pay pcp
+                where pcp.del_flag = '0'
+                  and pcp.project_id = #{query.id}
+                  and pcp.type = '1'
+                group by pcp.category_id,pcp.project_id
+            ) pcp1 on pc.id = pcp1.category_id and pc.project_id = pcp1.project_id
+        WHERE
+            pc.is_last = '1'
+          and pc.del_flag = '0'
+          and pc.project_id = #{query.id}
+         group by pc.id
+    </select>
+
+    <select id="fetchProjectAmount" resultType="com.cmoc.modules.srm.entity.ProjBase">
+        SELECT
+
+            <if test="query.unit == 'wy'">
+                round(sum(budget_amount) / 10000,2) as  budget_amount
+            </if>
+            <if test="query.unit != 'wy'">
+                sum(budget_amount) as  budget_amount
+            </if>
+        FROM
+            proj_base
+        WHERE
+            del_flag = '0'
+        <if test="query.id != null and query.id != ''">
+            and id = #{query.id}
+        </if>
+        <if test="query.subject != null and query.subject != ''">
+            and subject = #{query.subject}
+        </if>
+    </select>
+
+    <select id="fetchBudgetAmountByProjId" resultType="java.math.BigDecimal">
+        SELECT
+            sum(budget_amount) as budget_amount
+        FROM
+            proj_base pb
+        where del_flag = '0'
+        <if test="query.id != null and query.id != ''">
+            and id = #{query.id}
+        </if>
+        <if test="query.deptId != null and query.deptId != ''">
+            AND pb.apply_org_id = #{query.deptId}
+        </if>
+        <if test="query.subject != null and query.subject != ''">
+            AND pb.subject in
+            <foreach collection="query.subject.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="fetchContractAmountByProjId" resultType="java.math.BigDecimal">
+        select
+               sum(tmp.contract_amount_tax_local) as contract_amount
+        from (
+            SELECT
+                sum(ifnull(vca.contract_amount_tax_local,cb.contract_amount_tax_local))  as contract_amount_tax_local
+            FROM
+                contract_base cb
+                left join view_contract_amount vca on cb.id = vca.contract_id
+                INNER JOIN proj_base pb on cb.project_id = pb.id
+            where contract_status = '4'
+            and cb.del_flag = '0'
+            <if test="query.id != null and query.id != ''">
+                and cb.project_id = #{query.id}
+            </if>
+            <if test="query.deptId != null and query.deptId != ''">
+                AND pb.apply_org_id = #{query.deptId}
+            </if>
+            <if test="query.subject != null and query.subject != ''">
+                AND pb.subject in
+                <foreach collection="query.subject.split(',')" item="item" open="(" close=")" separator="," >
+                    #{item}
+                </foreach>
+            </if>
+            union all
+            select
+                   sum(pcp.pay_amount) as contract_amount_tax_local
+            from project_category_pay pcp
+            INNER JOIN proj_base pb on pcp.project_id = pb.id
+            where pcp.del_flag = '0'
+            and pcp.type = '0'
+            <if test="query.id != null and query.id != ''">
+                and pcp.project_id = #{query.id}
+            </if>
+            <if test="query.deptId != null and query.deptId != ''">
+                AND pb.apply_org_id = #{query.deptId}
+            </if>
+            <if test="query.subject != null and query.subject != ''">
+                AND pb.subject in
+                <foreach collection="query.subject.split(',')" item="item" open="(" close=")" separator="," >
+                    #{item}
+                </foreach>
+            </if>
+        ) tmp
+    </select>
+
+    <select id="fetchBudgetQtyByProjId" resultType="java.math.BigDecimal">
+        select
+               sum(qty) as qty
+        from
+             project_bom_relation pbr
+             inner join proj_base pb on pbr.proj_id = pb.id
+        where pbr.del_flag = '0'
+        <if test="query.id != null and query.id != ''">
+            and pbr.proj_id = #{query.id}
+        </if>
+        <if test="query.deptId != null and query.deptId != ''">
+            AND pb.apply_org_id = #{query.deptId}
+        </if>
+        <if test="query.subject != null and query.subject != ''">
+            AND pb.subject in
+            <foreach collection="query.subject.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="fetchContractQtyByProjId" resultType="java.math.BigDecimal">
+        SELECT
+            sum(co.qty) as qty
+        FROM
+            contract_object co
+            inner join contract_base cb on co.contract_id = cb.id
+            INNER JOIN proj_base pb on cb.project_id = pb.id
+        where co.del_flag = '0'
+          and cb.contract_status = '4'
+          and pb.proj_type = '0'
+        <if test="query.id != null and query.id != ''">
+            and project_id = #{query.id}
+        </if>
+        <if test="query.deptId != null and query.deptId != ''">
+            AND pb.apply_org_id = #{query.deptId}
+        </if>
+        <if test="query.subject != null and query.subject != ''">
+            AND pb.subject in
+            <foreach collection="query.subject.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="fetchCapacity" resultType="com.cmoc.modules.srm.entity.ProjectBomRelation">
+        select
+            a.model,
+            round((ifnull(b.capacity,0) / ifnull(a.capacity,0)) * 100,2) as capacity
+        from (
+                 SELECT
+                     pbr.model,
+                     sum(pbr.qty * pbr.capacity) as capacity
+                 FROM
+                     project_bom_relation pbr
+                 WHERE
+                     pbr.del_flag = '0'
+                   <if test="query.id != null and query.id != ''">
+                       and pbr.proj_id = #{query.id}
+                   </if>
+                 group by pbr.model
+             ) a
+         left join (
+            SELECT
+                bm.model,
+                sum(co.qty * co.capacity) as capacity
+            FROM
+                contract_object co
+                inner join contract_base cb on co.contract_id = cb.id
+                inner join bas_material bm on co.prod_code = bm.code
+            WHERE
+                co.del_flag = '0'
+              and cb.contract_status = '4'
+            <if test="query.id != null and query.id != ''">
+                and cb.project_id = #{query.id}
+            </if>
+            group by bm.model
+        ) b on a.model = b.model
+    </select>
+
+    <select id="fetchProjBudgetPageList" resultType="com.cmoc.modules.srm.vo.ProjBudget">
+        select
+            tmp.*
+        from (
+            SELECT
+                DISTINCT
+                bm.NAME AS prod_name,
+                bm.model,
+                bm.country,
+                pbr.proj_qty,
+                pbr.budget_price,
+                pbr.budget_amount,
+                pbr.qty AS execute_qty,
+                pbr.budget_price AS execute_price,
+                round(pbr.budget_price * pbr.qty,2) AS execute_amount,
+                GROUP_CONCAT(DISTINCT  coq.supp_name) AS supp_name,
+                sum(ifnull(coq.qty ,0 )) as contract_qty,
+                ifnull(sum(contract_amount_tax_local),0) as contract_amount_tax_local,
+                round(ifnull(sum(contract_price_tax_local),0),2) as contract_price_tax_local
+            FROM
+                project_bom_relation pbr
+                LEFT JOIN bas_material bm ON pbr.material_id = bm.id
+                LEFT JOIN (
+                    select
+                        coq.prod_code,
+                        GROUP_CONCAT(DISTINCT  cb.contract_second_party) as supp_name,
+                        sum(ifnull(coq.qty ,0 )) as qty,
+                        ifnull(sum(ifnull(vcra.contract_amount_tax_local,coq.contract_amount_tax_local)),0) as contract_amount_tax_local,
+                        round(sum(ifnull(vcra.contract_amount_tax_local,coq.contract_amount_tax_local)) / sum(ifnull(coq.qty ,0 )),2) as contract_price_tax_local
+                    from contract_base cb
+                    inner join contract_object coq on cb.id = coq.contract_id
+                    left join view_contract_record_amount vcra on coq.id = vcra.record_id
+                    where cb.contract_status = '4'
+                    and cb.project_id = #{query.projectId}
+                    <if test="query.suppName != null and query.suppName != ''">
+                        and coq.contract_second_party
+                        LIKE concat(concat('%',#{query.suppName}),'%')
+                    </if>
+                    group by coq.prod_code
+                ) coq on bm.code = coq.prod_code
+            WHERE
+            pbr.del_flag = '0'
+            <if test="query.projectId != null and query.projectId != ''">
+                and pbr.proj_id in
+                <foreach collection="query.projectId.split(',')" item="item" open="(" close=")" separator="," >
+                    #{item}
+                </foreach>
+            </if>
+            <if test="query.projectId == null or query.projectId == ''">
+              and pbr.proj_id is null
+            </if>
+            <if test="query.country != null and query.country != ''">
+                and bm.country LIKE concat(concat('%',#{query.country}),'%')
+            </if>
+            <if test="query.model != null and query.model != ''">
+                and bm.model = #{query.model}
+            </if>
+            <if test="query.prodName != null and query.prodName != ''">
+                and bm.name
+                LIKE concat(concat('%',#{query.prodName}),'%')
+            </if>
+
+            group by pbr.material_id
+        ) tmp
+        <if test="query.column != null and query.column != ''">
+            <if test="query.column == 'prodName'">
+                order by tmp.prod_name
+            </if>
+            <if test="query.column == 'country'">
+                order by tmp.country
+            </if>
+            <if test="query.column == 'suppName'">
+                order by tmp.supp_name
+            </if>
+            <if test="query.column == 'model'">
+                order by tmp.model
+            </if>
+            <if test="query.order == 'asc'">
+                asc
+            </if>
+            <if test="query.order == 'desc'">
+                desc
+            </if>
+
+        </if>
+    </select>
+
+    <select id="exportProjBudgetPageList" resultType="com.cmoc.modules.srm.vo.ProjBudget">
+        select
+        tmp.*
+        from (
+        SELECT
+        DISTINCT
+        bm.NAME AS prod_name,
+        bm.model,
+        bm.country,
+        pbr.proj_qty,
+        pbr.budget_price,
+        pbr.budget_amount,
+        pbr.qty AS execute_qty,
+        pbr.budget_price AS execute_price,
+        round(pbr.budget_price * pbr.qty,2) AS execute_amount,
+        GROUP_CONCAT(DISTINCT  coq.supp_name) AS supp_name,
+        sum(ifnull(coq.qty ,0 )) as contract_qty,
+        ifnull(sum(contract_amount_tax_local),0) as contract_amount_tax_local,
+        round(ifnull(sum(contract_price_tax_local),0),2) as contract_price_tax_local
+        FROM
+        project_bom_relation pbr
+        LEFT JOIN bas_material bm ON pbr.material_id = bm.id
+        LEFT JOIN (
+        select
+        coq.prod_code,
+        GROUP_CONCAT(DISTINCT  cb.contract_second_party) as supp_name,
+        sum(ifnull(coq.qty ,0 )) as qty,
+        ifnull(sum(ifnull(vcra.contract_amount_tax_local,coq.contract_amount_tax_local)),0) as contract_amount_tax_local,
+        round(sum(ifnull(vcra.contract_amount_tax_local,coq.contract_amount_tax_local)) / sum(ifnull(coq.qty ,0 )),2) as contract_price_tax_local
+        from contract_base cb
+        inner join contract_object coq on cb.id = coq.contract_id
+        left join view_contract_record_amount vcra on coq.id = vcra.record_id
+        where cb.contract_status = '4'
+        and cb.project_id = #{query.projectId}
+        <if test="query.suppName != null and query.suppName != ''">
+            and coq.contract_second_party
+            LIKE concat(concat('%',#{query.suppName}),'%')
+        </if>
+        group by coq.prod_code
+        ) coq on bm.code = coq.prod_code
+        WHERE
+        pbr.del_flag = '0'
+        and pbr.proj_id = #{query.projectId}
+        <if test="query.country != null and query.country != ''">
+            and bm.country LIKE concat(concat('%',#{query.country}),'%')
+        </if>
+        <if test="query.model != null and query.model != ''">
+            and bm.model = #{query.model}
+        </if>
+        <if test="query.prodName != null and query.prodName != ''">
+            and bm.name
+            LIKE concat(concat('%',#{query.prodName}),'%')
+        </if>
+
+        group by pbr.material_id
+        ) tmp
+        <if test="query.column != null and query.column != ''">
+            <if test="query.column == 'prodName'">
+                order by tmp.prod_name
+            </if>
+            <if test="query.column == 'country'">
+                order by tmp.country
+            </if>
+            <if test="query.column == 'suppName'">
+                order by tmp.supp_name
+            </if>
+            <if test="query.column == 'model'">
+                order by tmp.model
+            </if>
+            <if test="query.order == 'asc'">
+                asc
+            </if>
+            <if test="query.order == 'desc'">
+                desc
+            </if>
+
+        </if>
+    </select>
+
+    <select id="fetchTotalProjBudgetPageList" resultType="com.cmoc.modules.srm.vo.ProjBudget">
+
+        SELECT
+            ifnull(sum(pbr.qty * pbr.budget_price),0) as executeAmount,
+            ifnull(sum(pbr.proj_qty * pbr.budget_price),0) as budgetAmount
+        FROM
+            project_bom_relation pbr
+            inner join bas_material bm on pbr.material_id = bm.id
+        WHERE
+        pbr.del_flag = '0'
+        <if test="query.projectId != null and query.projectId != ''">
+            and pbr.proj_id in
+            <foreach collection="query.projectId.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.projectId == null or query.projectId == ''">
+            and pbr.proj_id is null
+        </if>
+        <if test="query.country != null and query.country != ''">
+            and bm.country LIKE concat(concat('%',#{query.country}),'%')
+        </if>
+        <if test="query.model != null and query.model != ''">
+            and bm.model = #{query.model}
+        </if>
+        <if test="query.prodName != null and query.prodName != ''">
+            and bm.name
+            LIKE concat(concat('%',#{query.prodName}),'%')
+        </if>
+
+    </select>
+
+    <update id="changeFileName">
+        update ${query.table} set ${query.column} = ${'#'}{query.url} where id = ${'#'}{query.id}
+    </update>
+
+    <select id="fetchModelByProjId" resultType="map">
+        SELECT
+            sdi.item_text as text,
+            sdi.item_value as `value`
+        FROM
+            sys_dict sd
+            INNER JOIN sys_dict_item sdi ON sd.id = sdi.dict_id
+        where sd.dict_code = 'model'
+          and sdi.item_value in (
+            select model from project_bom_child
+            where del_flag = '0'
+            and project_id in
+            <foreach collection="query.id.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        );
+    </select>
+
+    <select id="fetchProjType" resultType="map">
+        select
+            sdi.item_text as projType,
+            count(distinct pb.id) as num
+        from proj_base pb
+        left join sys_dict_item sdi ON pb.proj_type = sdi.item_value and sdi.dict_id = (
+            select sd.id from sys_dict sd
+            where sd.dict_code = 'proj_type'
+        )
+        where pb.del_flag = '0'
+        <if test="query.id != null and query.id != ''">
+            AND pb.id = #{query.id}
+        </if>
+        group by pb.proj_type
+    </select>
+
+    <select id="fetchProjArea" resultType="map">
+        select
+            sd.depart_name_abbr as abbr,
+            sd.depart_name as subject,
+            count(distinct pb.id) as num
+        from proj_base pb
+        LEFT JOIN sys_depart sd on pb.`subject` = sd.id
+        where pb.del_flag = '0'
+        <if test="query.id != null and query.id != ''">
+            AND pb.id = #{query.id}
+        </if>
+        <if test="query.subject != null and query.subject != ''">
+            AND pb.subject = #{query.subject}
+        </if>
+        group by pb.subject
+    </select>
+
+    <select id="exportProdList" resultType="com.cmoc.modules.srm.vo.BasMaterialImport">
+        SELECT
+            bm.`code`,
+            bm.`name`,
+            pbr.capacity,
+            pbr.proj_qty,
+            pbr.qty,
+            pbr.budget_price,
+            pbr.proj_price
+        FROM
+            project_bom_relation pbr
+            inner join bas_material bm on pbr.material_id = bm.id
+        where pbr.del_flag = '0'
+          and pbr.category_id = #{query.id}
+    </select>
+
+    <select id="exportXlsByList" resultType="com.cmoc.modules.srm.entity.ProjBase">
+        SELECT
+            distinct
+            pb.id,
+            pb.proj_name,
+            pb.proj_code,
+            pb.proj_type,
+            pb.proj_description,
+            pb.proj_background,
+            pb.proj_initiation_date,
+            pb.apply_org_id,
+            pb.proj_status,
+            pb.comment,
+            pb.sort,
+            pb.tenant_id,
+            pb.del_flag,
+            pb.create_user,
+            pb.update_user,
+            pb.create_time,
+            pb.update_time,
+            pb.project_manager,
+            pb.apply_user_id,
+            pb.apply_user_name,
+            pb.apply_org_name,
+            pb.budget_amount,
+            pb.proj_amount,
+            round(pb.budget_amount / pb.proj_amount * 100,2) as budget_percent,
+            round(ifnull(cb.contract_amount_tax_local,0) / pb.budget_amount * 100,2) as contract_percent,
+            ifnull(cb.contract_amount_tax_local,0) as used_amount,
+            pb.proj_capacity,
+            case
+            when (pb.budget_amount - cb.contract_amount_tax_local) >= 0
+            then (pb.budget_amount - cb.contract_amount_tax_local)
+            else 0 end remain_amount,
+            pb.in_attachment,
+            pb.out_attachment,
+            pb.other_attachment,
+            pb.subject,
+            case when ast.id is not null then '1' else '0' end isDisabled,
+            ifnull(ppp.pay_amount,0) as pay_amount
+        FROM
+        proj_base pb
+        left join (
+            select tmp.project_id,sum(tmp.contract_amount_tax_local) as contract_amount_tax_local from (
+            SELECT
+            sum(ifnull(vca.contract_amount_tax_local,cb.contract_amount_tax_local)) as contract_amount_tax_local,
+            cb.project_id
+            FROM
+            contract_base cb
+            left join view_contract_amount vca on cb.id = vca.contract_id
+            where cb.del_flag = '0'
+            and cb.contract_status = '4'
+            group by cb.project_id
+            union all
+            select
+            sum(pcp.pay_amount) as contract_amount_tax_local,
+            pcp.project_id
+            from project_category_pay pcp
+            where pcp.del_flag = '0'
+            and pcp.type = '0'
+            group by pcp.project_id
+            ) tmp
+            group by tmp.project_id
+        ) cb on pb.id = cb.project_id
+        left join (
+            select project_id,sum(pay_amount) as pay_amount from (
+            SELECT
+            ppa.project_id,
+            sum( ppa.pay_amount ) AS pay_amount
+            FROM
+            pur_pay_plan_detail pppd
+            INNER JOIN pur_pay_plan ppp ON pppd.pay_plan_id = ppp.id
+            INNER JOIN pur_pay_apply ppa ON pppd.pay_apply_id = ppa.id
+            WHERE
+            pppd.del_flag = '0'
+            AND ppp.pay_status = '2'
+            GROUP BY
+            ppa.project_id
+            union all
+            select pcp.project_id,sum(pcp.pay_amount) as pay_amount from project_category_pay pcp
+            where pcp.del_flag = '0'
+            and pcp.type = '1'
+            group by pcp.project_id
+            ) tmp
+            group by project_id
+        ) ppp on pb.id = ppp.project_id
+        left join approve_setting ast on pb.subject = ast.company and ast.username = #{query.createUser} and ast.type = 'project'
+        where pb.del_flag = '0'
+        <if test="query.id != null and query.id != ''">
+            AND pb.id = #{query.id}
+        </if>
+        <if test="query.auth == 'owner'">
+            AND pb.apply_user_id = #{query.auther}
+        </if>
+        <if test="query.auth == 'dept'">
+            AND pb.apply_org_id = #{query.auther}
+        </if>
+        <if test="query.auth == 'subject'">
+            AND pb.subject in
+            <foreach collection="query.auther.split(',')" item="item" open="(" close=")" separator="," >
+                #{item}
+            </foreach>
+        </if>
+        <if test="query.projCode != null and query.projCode != ''">
+            AND pb.proj_code LIKE concat(concat('%',#{query.projCode}),'%')
+        </if>
+        <if test="query.projName != null and query.projName != ''">
+            AND pb.proj_name LIKE concat(concat('%',#{query.projName}),'%')
+        </if>
+        <if test="query.projStatus != null and query.projStatus != ''">
+            AND pb.proj_status = #{query.projStatus}
+        </if>
+        <if test="query.applyOrgId != null and query.applyOrgId != ''">
+            AND pb.apply_org_id = #{query.applyOrgId}
+        </if>
+        <if test="query.column != null and query.column != ''">
+        <if test="query.column == 'projCode'">
+            order by pb.proj_code
+        </if>
+        <if test="query.column == 'projName'">
+            order by pb.proj_name
+        </if>
+        <if test="query.column == 'applyUserId'">
+            order by pb.apply_user_id
+        </if>
+        <if test="query.column == 'applyOrgId'">
+            order by pb.apply_org_id
+        </if>
+        <if test="query.column == 'projInitiationDate'">
+            order by pb.proj_initiation_date
+        </if>
+        <if test="query.column == 'budgetAmount'">
+            order by pb.budget_amount
+        </if>
+        <if test="query.column == 'projAmount'">
+            order by pb.proj_amount
+        </if>
+        <if test="query.column == 'usedAmount'">
+            order by ifnull(cb.contract_amount_tax_local,0)
+        </if>
+        <if test="query.column == 'remainAmount'">
+            order by case
+            when (pb.budget_amount - cb.contract_amount_tax_local) >= 0
+            then (pb.budget_amount - cb.contract_amount_tax_local)
+            else 0 end
+        </if>
+        <if test="query.column == 'payAmount'">
+            order by ifnull(ppp.pay_amount,0)
+        </if>
+        <if test="query.column == 'sort'">
+            order by pb.sort
+        </if>
+        <if test="query.column == 'createTime'">
+            order by pb.create_time
+        </if>
+        <if test="query.order == 'asc'">
+            asc
+        </if>
+        <if test="query.order == 'desc'">
+            desc
+        </if>
+        </if>
+    </select>
+
+    <select id="fetchProjectAmountByType" resultType="map">
+        SELECT
+            <if test="query.unit == 'wy'">
+                round(sum(pb.budget_amount)/10000,2) as  payAmount,
+            </if>
+            <if test="query.unit != 'wy'">
+                sum(pb.budget_amount) as  payAmount,
+            </if>
+            sdi.item_text as projType
+        FROM
+            proj_base pb
+            left join sys_dict_item sdi ON pb.proj_type = sdi.item_value and sdi.dict_id = (
+                select sd.id from sys_dict sd
+                where sd.dict_code = 'proj_type'
+            )
+        WHERE
+        pb.del_flag = '0'
+        <if test="query.id != null and query.id != ''">
+            and pb.id = #{query.id}
+        </if>
+        <if test="query.subject != null and query.subject != ''">
+            and pb.subject = #{query.subject}
+        </if>
+        group by pb.proj_type
+    </select>
+
+    <select id="fetchProjAmountBySubject" resultType="map">
+        select
+           sd.alias as subject,
+            <if test="query.unit == 'wy'">
+                round(sum(pb.budget_amount) / 10000,2) as budgetAmount
+            </if>
+            <if test="query.unit != 'wy'">
+                sum(pb.budget_amount) as budgetAmount
+            </if>
+        from proj_base pb
+        inner join sys_depart sd on pb.subject = sd.id
+        where pb.del_flag = '0'
+        <if test="query.subject != null and query.subject != ''">
+            and pb.subject = #{query.subject}
+        </if>
+        group by pb.subject
+    </select>
+
+    <select id="fetchModelBySubject" resultType="com.cmoc.modules.srm.entity.ProjectBomChild">
+        SELECT
+            sum( pbc.capacity ) AS capacity,
+            sum( pbc.act_capacity ) AS act_capacity,
+            IFNULL(round(sum( pbc.act_capacity ) / sum( pbc.capacity ) * 100,2),0) as rate,
+            dt.item_text as model
+        FROM
+            project_bom_child pbc
+            INNER JOIN proj_base pb ON pbc.project_id = pb.id
+            LEFT JOIN (
+                SELECT
+                    dict.dict_code,
+                    item.item_text ,
+                    item.item_value
+                FROM
+                    sys_dict_item item
+                        INNER JOIN sys_dict dict ON dict.id = item.dict_id
+                WHERE
+                    dict_code = 'model'
+            ) dt ON pbc.model = dt.item_value
+        WHERE
+            pbc.del_flag = '0'
+        <if test="query.subject != null and query.subject != ''">
+            and pb.subject = #{query.subject}
+        </if>
+        GROUP BY
+            pbc.model
+    </select>
+</mapper>

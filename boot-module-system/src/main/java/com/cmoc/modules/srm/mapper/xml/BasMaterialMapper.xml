@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.BasMaterialMapper">
+    <select id="getMaxCode" resultType="com.cmoc.modules.srm.entity.BasMaterial">
+        SELECT
+            bmc.id as last_category_id,
+            max(bm.code) as code
+        FROM
+            bas_material bm
+            inner join bas_material_category bmc on SUBSTR(bm.code,1,LENGTH(bm.code) - 4) = bmc.`code`
+        group by bmc.`code`
+    </select>
+
+    <select id="getMaxCodeByCode" resultType="com.cmoc.modules.srm.entity.BasMaterial">
+        select * from bas_material
+        where code like concat(#{code},'%')
+        order by code desc
+    </select>
+
+    <select id="fetchHistoryQuote" resultType="com.cmoc.modules.srm.entity.BiddingRecord">
+        SELECT
+            bs.NAME AS supp_name,
+            bs.CODE AS supp_code,
+            bs.supplier_type,
+            bqr.price_tax,
+            br.spe_type,
+            bqr.create_time,
+            bq.currency,
+            sup.is_recommend
+        FROM
+            bidding_quote_record bqr
+            left join bidding_quote bq on bqr.quote_id = bq.id
+            LEFT JOIN bas_supplier bs ON bqr.supp_id = bs.id
+            LEFT JOIN bidding_record br ON bqr.record_id = br.id
+            LEFT JOIN bidding_supplier sup ON bqr.bidding_id = sup.bidding_id
+            AND sup.supplier_id = bqr.supp_id
+        WHERE
+            bqr.del_flag = '0'
+            and br.prod_code = #{query.code}
+        UNION ALL
+        SELECT
+            bs.NAME AS supp_name,
+            bs.CODE AS supp_code,
+            bs.supplier_type,
+            sq.order_price_tax AS price_tax,
+            sq.spe_type,
+            sq.create_time,
+            sq.currency,
+            isp.is_recommend
+        FROM
+            sup_quote sq
+            LEFT JOIN bas_supplier bs ON sq.supp_id = bs.id
+            LEFT JOIN inquiry_supplier isp on sq.record_id = isp.record_id and sq.supp_id = isp.supplier_id
+            left join inquiry_record ir on sq.record_id = ir.id
+        where sq.del_flag = '0'
+        and ir.prod_code = #{query.code}
+    </select>
+</mapper>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.srm.mapper.BiddingSupplierMapper">
+
+	<delete id="deleteByMainId" parameterType="java.lang.String">
+		DELETE 
+		FROM  bidding_supplier 
+		WHERE
+			 bidding_id = #{mainId} 	</delete>
+	
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="com.cmoc.modules.srm.entity.BiddingSupplier">
+		SELECT * 
+		FROM  bidding_supplier
+		WHERE
+			 bidding_id = #{mainId} 	</select>
+
+	<select id="fetchBiddingSuppList" resultType="com.cmoc.modules.srm.entity.BiddingSupplier">
+		SELECT
+			bs.is_recommend,
+			bs.id,
+			bs.record_id,
+			bs.supplier_id,
+			bs.bidding_id,
+			bp.name
+		FROM
+			bidding_supplier bs
+			left join bas_supplier bp on bs.supplier_id = bp.id
+		where bs.del_flag = '0'
+		and bs.record_id = #{id}
+	</select>
+
+	<select id="fetchHasBiddingSuppList" resultType="com.cmoc.modules.srm.entity.BiddingSupplier">
+		SELECT
+			bs.is_recommend,
+			bs.id,
+			bs.supplier_id,
+			bs.bidding_id,
+			bp.name,
+		    ifnull(bqr.amount_tax,0) as amount_tax,
+		    bqr.currency,
+			bqr.attachment,
+			bqr.other_attachment,
+			bqr.lead_time
+		FROM
+			bidding_supplier bs
+			left join bas_supplier bp on bs.supplier_id = bp.id
+			left join (
+				select bqr.supp_id,bqr.bidding_id,sum(bqr.amount_tax) as amount_tax,bq.currency,
+				GROUP_CONCAT(distinct bq.attachment) as attachment,GROUP_CONCAT(distinct bq.other_attachment) as other_attachment,
+				max(bqr.lead_time) as lead_time
+				from bidding_quote_record bqr
+				left join bidding_quote bq on bqr.quote_id = bq.id
+			    where bqr.del_flag = '0'
+				and bqr.bidding_id = #{id}
+				<if test="supplierId != null and supplierId != ''">
+					AND bqr.supp_id = #{supplierId}
+				</if>
+			    group by bqr.supp_id,bqr.bidding_id
+			) bqr on bs.supplier_id = bqr.supp_id and bqr.bidding_id = bs.bidding_id
+		where bs.del_flag = '0'
+		  and bs.bidding_id = #{id}
+		  <if test="supplierId != null and supplierId != ''">
+			AND bs.supplier_id = #{supplierId}
+		  </if>
+	</select>
+
+	<select id="fetchSuppList" resultType="com.cmoc.modules.srm.entity.BiddingSupplier">
+		SELECT
+			bs.id,
+			bs.supplier_id,
+			bs.bidding_id,
+			bp.name,
+		    bp.corporate,
+		    bp.telephone
+		FROM
+			bidding_supplier bs
+			left join bas_supplier bp on bs.supplier_id = bp.id
+		where bs.del_flag = '0'
+		  and bs.bidding_id = #{id}
+	</select>
+
+	<select id="fetchFixBiddingList" resultType="com.cmoc.modules.srm.vo.FixBiddingPage">
+		SELECT
+		    case when (bm.bidding_status = '3' or bm.bidding_status = '2' or bm.bidding_status = '8') then brs.is_recommend
+		    else brtp.is_recommend end is_recommend,
+			brs.id,
+			brs.record_id,
+			bs.supplier_id,
+			bs.bidding_id,
+			bs.item_total,
+			brs.bidding_qty,
+			brs.bs_id,
+		    brs.is_contract,
+			brs.is_bargin,
+			bp.name,
+			bsc.contacter,
+			bsc.contacter_tel,
+			bsc.contacter_email,
+			bqr.currency as currency,
+			bqr.create_time as offerTime,
+			bqr.amount_tax as amount,
+		    bqr.price_tax,
+			bqr.id as quote_record_id,
+		    bqr.tax_rate,
+		    bqr.trade_type,
+			bqr.spe_type as sup_spe_type,
+			bqr.brand_name as sup_brand_name,
+			bqr.attachment,
+			bqr.comment
+		FROM
+		    bidding_record_supplier brs
+			left join bidding_supplier bs on brs.bs_id = bs.id
+			left join bas_supplier bp on brs.supplier_id = bp.id
+			left join bas_supplier_contact bsc on bp.id = bsc.supplier_id and bsc.del_flag = '0' and bsc.is_default = '1'
+			left join (
+				select brtp.bs_id,brtp.is_recommend from bidding_record_to_professionals brtp
+			    where brtp.del_flag = '0'
+				and is_recommend = '1'
+			    group by brtp.bs_id
+			) brtp on bs.id = brtp.bs_id
+			left join bidding_main bm on brs.bidding_id = bm.id
+			left join (
+				select
+					bqr.supp_id,
+					bqr.bidding_id,
+					bqr.record_id,
+					bqr.amount_tax,
+				    bqr.price_tax,
+					bqr.id,
+					bqr.spe_type,
+					bqr.brand_name,
+					bqr.comment,
+					concat_ws(',',bq.attachment,bq.other_attachment) as attachment,
+				    bq.tax_rate,
+					bq.create_time,
+					bq.currency,
+					bq.trade_type
+				from
+					bidding_quote_record bqr
+					left join bidding_quote bq on bqr.quote_id = bq.id
+				where bqr.del_flag = '0'
+			) bqr on brs.supplier_id = bqr.supp_id and brs.bidding_id = bqr.bidding_id and brs.record_id = bqr.record_id
+		where bs.del_flag = '0'
+		  and bs.bidding_id = #{id}
+		  order by bs.item_total desc
+	</select>
+</mapper>
