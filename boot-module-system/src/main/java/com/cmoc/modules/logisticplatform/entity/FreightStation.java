@@ -15,13 +15,13 @@ import org.jeecgframework.poi.excel.annotation.Excel;
 @TableName("bas_freight_station")
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value="bas_freight_station对象", description="bas_freight_station")
+@ApiModel(value="bas_freight_station对象", description="货运站")
 public class FreightStation {
 
     /**id*/
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.AUTO)
     @ApiModelProperty(value = "id")
-    private String id;
+    private Integer id;
 
     @Excel(name = "货运站编码", width = 15)
     @ApiModelProperty(value = "货运站编码")

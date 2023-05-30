@@ -10,16 +10,13 @@
             AND bff.id = #{query.id}
         </if>
         <if test="query.freightForwardingNumber != null and query.freightForwardingNumber != ''">
-            AND bff.freight_station_number = #{query.freightForwardingNumber}
+            AND bff.freight_forwarding_number = #{query.freightForwardingNumber}
         </if>
-        <if test="query.freightStationName != null and query.freightStationName != ''">
-            AND bff.freight_station_name LIKE concat(concat('%',#{query.freightStationName}),'%')
+        <if test="query.freightForwardingName != null and query.freightForwardingName != ''">
+            AND bff.freight_forwarding_name LIKE concat(concat('%',#{query.freightForwardingName}),'%')
         </if>
         <if test="query.abbreviation != null and query.abbreviation != ''">
             AND bff.abbreviation = #{query.abbreviation}
-        </if>
-        <if test="query.address != null and query.address != ''">
-            AND bff.address = #{query.address}
         </if>
         <if test="query.externalSupplierNumber != null and query.externalSupplierNumber != ''">
             AND bff.external_supplier_number = #{query.externalSupplierNumber}

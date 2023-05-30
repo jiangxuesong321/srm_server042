@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.logisticplatform.mapper.BaseForwardingAgentMapper">
+
+    <select id="getList" resultType="com.cmoc.modules.logisticplatform.entity.ForwardingAgent">
+        select bfa.*
+        from bas_forwarding_agent bfa
+        where bfa.del_flag = 0
+        <if test="query.id != null and query.id != ''">
+            AND bfa.id = #{query.id}
+        </if>
+        <if test="query.forwardingAgentNumber != null and query.forwardingAgentNumber != ''">
+            AND bfa.forwarding_agent_number = #{query.forwardingAgentNumber}
+        </if>
+        <if test="query.forwardingAgentName != null and query.forwardingAgentName != ''">
+            AND bfa.forwarding_agent_name LIKE concat(concat('%',#{query.forwardingAgentName}),'%')
+        </if>
+        <if test="query.abbreviation != null and query.abbreviation != ''">
+            AND bfa.abbreviation = #{query.abbreviation}
+        </if>
+        <if test="query.modeOfTransportation != null and query.modeOfTransportation != ''">
+            AND bfa.mode_of_transportation = #{query.modeOfTransportation}
+        </if>
+        limit ${(pageNo-1)*pageSize}, #{pageSize};
+    </select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*) from bas_forwarding_agent
+    </select>
+
+
+
+</mapper>

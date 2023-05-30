@@ -1,16 +1,15 @@
 package com.cmoc.modules.logisticplatform.mapper;
 
 import com.cmoc.modules.logisticplatform.entity.ForwardingAgent;
-import com.cmoc.modules.logisticplatform.entity.FreightForwarding;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 @Mapper
-public interface BaseFreightForwardingMapper {
+public interface BaseForwardingAgentMapper {
 
-    List<FreightForwarding> getList(@Param("query") FreightForwarding freightForwarding,
+    List<ForwardingAgent> getList(@Param("query") ForwardingAgent forwardingAgent,
                                   @Param("pageNo") Integer pageNo,
                                   @Param("pageSize") Integer pageSize);
 
