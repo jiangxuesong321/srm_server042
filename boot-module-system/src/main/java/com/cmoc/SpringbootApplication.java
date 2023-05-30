@@ -21,8 +21,8 @@ import java.net.UnknownHostException;
 * 2.切换微服务 勾选profile的SpringCloud，这个类就无法启动，启动会报错
 */
 @Slf4j
-@SpringBootApplication
-@EnableAutoConfiguration(exclude={MongoAutoConfiguration.class})
+@SpringBootApplication(exclude={MongoAutoConfiguration.class})
+//@EnableAutoConfiguration(exclude={MongoAutoConfiguration.class})
 public class SpringbootApplication extends SpringBootServletInitializer {
 
     @Override
@@ -37,7 +37,7 @@ public class SpringbootApplication extends SpringBootServletInitializer {
         String port = env.getProperty("server.port");
         String path = oConvertUtils.getString(env.getProperty("server.servlet.context-path"));
         log.info("\n----------------------------------------------------------\n\t" +
-                "Application is running! Access URLs:\n\t" +
+                "Spring Boot Application is running! Access URLs:\n\t" +
                 "Local: \t\thttp://localhost:" + port + path + "/\n\t" +
                 "External: \thttp://" + ip + ":" + port + path + "/\n\t" +
                 "Swagger文档: \thttp://" + ip + ":" + port + path + "/doc.html\n" +

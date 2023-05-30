@@ -13,7 +13,7 @@ import org.jeecgframework.codegenerate.generate.pojo.onetomany.SubTableVo;
  * @site www.jeecg.com
  * 
  */
-public class OneToMainUtil {
+public class SpringbootOneToMainUtil {
 
 	/**
 	 * 一对多(父子表)数据模型，生成方法

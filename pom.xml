@@ -4,7 +4,7 @@
   <artifactId>boot-parent</artifactId>
   <version>3.2.0</version>
   <packaging>pom</packaging>
-  <name>JEECG BOOT ${project.version}</name>
+  <name>SPRING BOOT ${project.version}</name>
 
   	<parent>
 	    <groupId>org.springframework.boot</groupId>
@@ -14,7 +14,7 @@
 	</parent>
 
 	<properties>
-		<jeecgboot.version>3.2.0</jeecgboot.version>
+		<boot.version>3.2.0</boot.version>
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -144,33 +144,33 @@
 			<!-- system 模块-->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
-				<artifactId>boot-module-system</artifactId>
-				<version>${jeecgboot.version}</version>
+				<artifactId>jeecg-boot-module-system</artifactId>
+				<version>${boot.version}</version>
 			</dependency>
 
 			<!-- tools -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
 				<artifactId>boot-base-tools</artifactId>
-				<version>${jeecgboot.version}</version>
+				<version>${boot.version}</version>
 			</dependency>
 			<!-- core -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
 				<artifactId>boot-base-core</artifactId>
-				<version>${jeecgboot.version}</version>
+				<version>${boot.version}</version>
 			</dependency>
 			<!-- system 单体 api -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
 				<artifactId>system-local-api</artifactId>
-				<version>${jeecgboot.version}</version>
+				<version>${boot.version}</version>
 			</dependency>
 			<!-- system 微服务 api -->
 			<dependency>
 				<groupId>org.jeecgframework.boot</groupId>
 				<artifactId>system-cloud-api</artifactId>
-				<version>${jeecgboot.version}</version>
+				<version>${boot.version}</version>
 			</dependency>
 
             <!--微服务启动依赖-->

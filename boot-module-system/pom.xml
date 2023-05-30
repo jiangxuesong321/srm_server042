@@ -7,7 +7,7 @@
 		<version>3.2.0</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-
+	<description>system模块</description>
 	<artifactId>boot-system-server</artifactId>
 
 	<repositories>
@@ -109,7 +109,7 @@
 		<dependency>
 			<groupId>wsdl4j</groupId>
 			<artifactId>wsdl4j</artifactId>
-			<version>1.4</version>
+			<version>1.6.3</version>
 		</dependency>
 
 		<dependency>
