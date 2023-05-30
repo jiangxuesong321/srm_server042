@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.logisticplatform.mapper.BasePortMapper">
+
+    <select id="getList" resultType="com.cmoc.modules.logisticplatform.entity.Port">
+        select bp.*
+        from bas_port bp
+        where bp.del_flag = 0
+        <if test="query.id != null and query.id != ''">
+            AND bp.id = #{query.id}
+        </if>
+        <if test="query.portCode != null and query.portCode != ''">
+            AND bp.port_code = #{query.portCode}
+        </if>
+        <if test="query.portNameCn != null and query.portNameCn != ''">
+            AND bp.port_name_cn LIKE concat(concat('%',#{query.portNameCn}),'%')
+        </if>
+        <if test="query.portNameEn != null and query.portNameEn != ''">
+            AND bp.port_name_en = #{query.portNameEn}
+        </if>
+        <if test="query.county != null and query.county != ''">
+            AND bp.county = #{query.county}
+        </if>
+        limit ${(pageNo-1)*pageSize}, #{pageSize};
+    </select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*) from bas_port
+    </select>
+
+
+
+</mapper>

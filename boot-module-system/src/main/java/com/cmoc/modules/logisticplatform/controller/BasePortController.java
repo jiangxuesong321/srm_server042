@@ -2,8 +2,8 @@ package com.cmoc.modules.logisticplatform.controller;
 
 
 import com.cmoc.common.api.vo.Result;
-import com.cmoc.modules.logisticplatform.entity.ForwardingAgent;
-import com.cmoc.modules.logisticplatform.service.BaseForwardingAgentService;
+import com.cmoc.modules.logisticplatform.entity.Port;
+import com.cmoc.modules.logisticplatform.service.BasePortService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -20,42 +20,42 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Description: forwarding_agent 承运商
+ * @Description: port 港口
  * @Author: Atom Jiang
  * @Date: 2023-05-30
  * @Version: V1.0
  */
-@Api(tags = "forwarding_agent")
+@Api(tags = "port")
 @RestController
-@RequestMapping("/base/forwarding_agent")
+@RequestMapping("/base/port")
 @Slf4j
-public class BaseForwardingAgentController {
+public class BasePortController {
 
     @Autowired
-    private BaseForwardingAgentService baseForwardingAgentService;
+    private BasePortService basePortService;
 
     /**
      * 分页列表查询
      *
-     * @param forwardingAgent
+     * @param port
      * @param pageNo
      * @param pageSize
      * @param req
      * @return
      */
-    @ApiOperation(value = "forwarding_agent-分页列表查询", notes = "forwarding_agent-分页列表查询")
+    @ApiOperation(value = "port-分页列表查询", notes = "port-分页列表查询")
     @GetMapping(value = "/list")
-    public Result<Map> queryPageList(ForwardingAgent forwardingAgent,
+    public Result<Map> queryPageList(Port port,
                                      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
                                      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                                      HttpServletRequest req) {
-        List<ForwardingAgent> forwardingAgentList = new ArrayList<>();
+        List<Port> portList = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
         try {
-            forwardingAgentList = baseForwardingAgentService.getList(forwardingAgent, pageNo, pageSize);
-            Integer total = baseForwardingAgentService.getCount();
+            portList = basePortService.getList(port, pageNo, pageSize);
+            Integer total = basePortService.getCount();
             map.put("total", total);
-            map.put("result", forwardingAgentList);
+            map.put("result", portList);
         } catch (Exception ex) {
             ex.printStackTrace();
             return Result.error("查询失败", map);

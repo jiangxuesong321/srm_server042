@@ -2,8 +2,10 @@ package com.cmoc.modules.logisticplatform.controller;
 
 
 import com.cmoc.common.api.vo.Result;
-import com.cmoc.modules.logisticplatform.entity.ForwardingAgent;
-import com.cmoc.modules.logisticplatform.service.BaseForwardingAgentService;
+import com.cmoc.modules.logisticplatform.entity.FreightForwarding;
+import com.cmoc.modules.logisticplatform.entity.StorageLocation;
+import com.cmoc.modules.logisticplatform.service.BaseFreightForwardingService;
+import com.cmoc.modules.logisticplatform.service.BaseStorageLocationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -20,46 +22,47 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Description: forwarding_agent 承运商
+ * @Description: storage_location 库存地点
  * @Author: Atom Jiang
  * @Date: 2023-05-30
  * @Version: V1.0
  */
-@Api(tags = "forwarding_agent")
+@Api(tags = "port")
 @RestController
-@RequestMapping("/base/forwarding_agent")
+@RequestMapping("/base/storage_location")
 @Slf4j
-public class BaseForwardingAgentController {
+public class BaseStorageLocationController {
 
     @Autowired
-    private BaseForwardingAgentService baseForwardingAgentService;
+    private BaseStorageLocationService baseStorageLocationService;
 
     /**
      * 分页列表查询
      *
-     * @param forwardingAgent
+     * @param storageLocation
      * @param pageNo
      * @param pageSize
      * @param req
      * @return
      */
-    @ApiOperation(value = "forwarding_agent-分页列表查询", notes = "forwarding_agent-分页列表查询")
+    @ApiOperation(value = "bas_storage_location-分页列表查询", notes = "bas_storage_location-分页列表查询")
     @GetMapping(value = "/list")
-    public Result<Map> queryPageList(ForwardingAgent forwardingAgent,
+    public Result<Map> queryPageList(StorageLocation storageLocation,
                                      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
                                      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                                      HttpServletRequest req) {
-        List<ForwardingAgent> forwardingAgentList = new ArrayList<>();
-        Map<String, Object> map = new HashMap<>();
+        List<StorageLocation> storageLocationList = new ArrayList<>();
+        Map<String,Object> map = new HashMap<>();
         try {
-            forwardingAgentList = baseForwardingAgentService.getList(forwardingAgent, pageNo, pageSize);
-            Integer total = baseForwardingAgentService.getCount();
-            map.put("total", total);
-            map.put("result", forwardingAgentList);
+            storageLocationList = baseStorageLocationService.getList(storageLocation, pageNo, pageSize);
+            Integer total = baseStorageLocationService.getCount();
+            map.put("total",total);
+            map.put("result",storageLocationList);
         } catch (Exception ex) {
             ex.printStackTrace();
             return Result.error("查询失败", map);
         }
         return Result.OK(map);
     }
+
 }
