@@ -207,7 +207,7 @@ jeecg:
     #webapp: /opt/webapp
     webapp: E:\opt\webapp
   shiro:
-    excludeUrls: /test/jeecgDemo/demo3,/test/jeecgDemo/redisDemo/**,/category/**,/visual/**,/map/**,/jmreport/bigscreen2/**
+    excludeUrls: /test/jeecgDemo/demo3,/test/jeecgDemo/redisDemo/**,/category/**,/visual/**,/map/**,/jmreport/bigscreen2/**,/base/freight_station/*
   #阿里云oss存储和大鱼短信秘钥配置
   oss:
     accessKey: ??

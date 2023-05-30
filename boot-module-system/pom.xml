@@ -38,7 +38,7 @@
 			<systemPath>${pom.basedir}/src/main/resources/lib/sapjco3.jar</systemPath>
 		</dependency>
 		<dependency>
-			<groupId>org.jeecgframework.boot</groupId>
+			<groupId>org.framework.boot</groupId>
 			<artifactId>system-local-api</artifactId>
 		</dependency>
 		<dependency>

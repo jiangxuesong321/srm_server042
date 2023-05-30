@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmoc.modules.logisticplatform.mapper.BaseFreightForwardingMapper">
+
+    <select id="getList" resultType="com.cmoc.modules.logisticplatform.entity.FreightForwarding">
+        select bff.*
+        from bas_freight_forwarding bff
+        where bff.del_flag = 0
+        <if test="query.id != null and query.id != ''">
+            AND bff.id = #{query.id}
+        </if>
+        <if test="query.freightForwardingNumber != null and query.freightForwardingNumber != ''">
+            AND bff.freight_station_number = #{query.freightForwardingNumber}
+        </if>
+        <if test="query.freightStationName != null and query.freightStationName != ''">
+            AND bff.freight_station_name LIKE concat(concat('%',#{query.freightStationName}),'%')
+        </if>
+        <if test="query.abbreviation != null and query.abbreviation != ''">
+            AND bff.abbreviation = #{query.abbreviation}
+        </if>
+        <if test="query.address != null and query.address != ''">
+            AND bff.address = #{query.address}
+        </if>
+        <if test="query.externalSupplierNumber != null and query.externalSupplierNumber != ''">
+            AND bff.external_supplier_number = #{query.externalSupplierNumber}
+        </if>
+        limit ${(pageNo-1)*pageSize}, #{pageSize};
+    </select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*) from bas_freight_forwarding
+    </select>
+
+
+
+</mapper>

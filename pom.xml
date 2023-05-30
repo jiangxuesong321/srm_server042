@@ -150,25 +150,25 @@
 
 			<!-- tools -->
 			<dependency>
-				<groupId>org.jeecgframework.boot</groupId>
+				<groupId>org.framework.boot</groupId>
 				<artifactId>boot-base-tools</artifactId>
 				<version>${boot.version}</version>
 			</dependency>
 			<!-- core -->
 			<dependency>
-				<groupId>org.jeecgframework.boot</groupId>
+				<groupId>org.framework.boot</groupId>
 				<artifactId>boot-base-core</artifactId>
 				<version>${boot.version}</version>
 			</dependency>
 			<!-- system 单体 api -->
 			<dependency>
-				<groupId>org.jeecgframework.boot</groupId>
+				<groupId>org.framework.boot</groupId>
 				<artifactId>system-local-api</artifactId>
 				<version>${boot.version}</version>
 			</dependency>
 			<!-- system 微服务 api -->
 			<dependency>
-				<groupId>org.jeecgframework.boot</groupId>
+				<groupId>org.framework.boot</groupId>
 				<artifactId>system-cloud-api</artifactId>
 				<version>${boot.version}</version>
 			</dependency>
